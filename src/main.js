@@ -61,12 +61,24 @@ window.addEventListener('load', () => {
   const video       = document.getElementById('splashVideo');
   const mainContent = document.getElementById('mainContent');
   if (!splash || !video || !mainContent) return;
+  // >>> Forzamos atributos imprescindibles para autoplay en móvil:
+  video.autoplay = true;
+  video.muted = true;
+  video.loop = true;
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+  video.setAttribute('preload', 'auto');
+
   // --- Opcional: arrancar sólo cuando haya suficiente buffer ---
   video.addEventListener('canplaythrough', () => {
+    video.play().then(() => {
+      console.log('▶ Vídeo reproduciéndose (móvil y escritorio)');
     video.play().catch(err => {
       console.warn('La reproducción automática no fue permitida:', err);
     });
   });
+  });
+
   // Cuando el vídeo termina, lanzamos la transición cruzada
   video.addEventListener('ended', () => {
     // inicia fade-out del splash
