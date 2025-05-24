@@ -1,0 +1,814 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  font-family: ui-sans-serif, system-ui, sans-serif,
+               "Apple Color Emoji", "Segoe UI Emoji",
+               "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Por defecto, ocultamos la cabecera móvil */
+.mobile-header {
+  display: none;
+}
+:root {
+  --bg: #fff;
+  --fg: #000;
+  --bg-dark: #121212;
+  --fg-dark: #e0e0e0;
+  --accent: #3b82f6;
+  --transition: .3s;
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  overflow: auto;
+  transition: background var(--transition), color var(--transition);
+}
+
+body.dark {
+  background-color: var(--bg-dark);
+  color: var(--fg-dark);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Nav buttons */
+.nav-controls .btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  margin-left: .5rem;
+  padding: .5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.nav-controls .btn:hover {
+  background: #2563eb;
+}
+
+/* Filter buttons (escritorio) */
+.filter-controls .filter-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: .5rem 1rem;
+  margin-left: .5rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.filter-controls .filter-btn:hover,
+.filter-controls .filter-btn.active {
+  background: #2563eb;
+}
+
+/* Gallery container */
+.gallery-container {
+  position: fixed;
+  top: 4.66rem; /* igual a altura header */
+  right: 0;
+  bottom: 1.8rem;
+  left: 0;
+  overflow:hidden;
+  z-index: 1;
+}
+
+/* Image gallery */
+.image-gallery {
+  position: absolute;
+  width: 100%;
+  min-height: 100vh;
+}
+.draggable {
+  position: absolute;
+  width:clamp(80px, 10vw, 120px);
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  cursor: grab;
+  transition: box-shadow .2s;
+  aspect-ratio: 2 / 2;      /* reserva un rectángulo 3:2 antes de cargar */
+    object-fit: cover;  
+  will-change: transform;
+  touch-action: none;    /* Deshabilita el scroll nativo al arrastrar */
+ user-select: none;     /* Evita selecciones de texto accidentales */
+}
+.draggable:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+.draggable:active {
+  cursor: grabbing;
+}
+.draggable:focus {
+  outline: 2px solid var(--accent);
+}
+/* ======= Efecto de carga ======= */
+/* Antes de cargar: pequeño blur y baja opacidad */
+.draggable.image-loading {
+  filter: blur(8px);
+  opacity: 0.6;
+}
+
+/* Al cargarse, transición suave a sin filtro */
+.draggable {
+  /* transition ya incluye opacity y box-shadow */
+  transition: filter .5s ease, opacity .5s ease, box-shadow .2s;
+  opacity: 1;
+  filter: none;
+}
+
+@media (max-width: 1024px) {
+  .draggable {
+    width: clamp(70px, 20vw, 150px);
+  }
+}
+/* Posiciones iniciales de las imágenes */
+#Velazquez { left: 10%; top: 10%; }
+#Nieve     { left: 55%; top: 15%; }
+#Pablo     { left: 10%; top: 40%; }
+#Ester     { left: 80%; top: 30%; }
+#Autorretrato { left: 70%; top: 60%; }
+#Ascen    { left: 45%; top: 60%; }
+#Gijon   { left: 30%; top: 20%; }
+/* Splash screen */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 10000;
+}
+/* Estilo para el título en el Splash Screen */
+#splash h1 {
+  margin: 0;
+  font-size: 3rem;
+  color: var(--accent);
+  position: relative;
+  z-index: 2;
+}
+
+/* Loader shimmer */
+.image-loading {
+  background: #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+.image-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Popup & Modal */
+.popup,
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+.popup.active,
+.modal:not(.hidden) {
+  display: flex;
+}
+.popup-content,
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* centro el contenido */
+  text-align: center;        /* centrar texto e iconos */
+  background: var(--bg);
+  color: var(--fg);
+  padding: 2rem;
+  border-radius: 8px;
+
+  /* ============================
+     MODAL AUTO-AJUSTABLE
+  ============================ */
+  width: auto;               /* que crezca al contenido */
+  max-width: 400px;          /* hasta 400px de ancho */
+  min-width: 200px;          /* no menor a 200px */
+  max-height: 80vh;          /* evita salirse verticalmente */
+  overflow-y: auto;          /* scroll interno si es necesario */
+  overflow-x: hidden;        /* no scroll horizontal */
+  /* ============================ */
+
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity .2s, transform .2s;
+}
+.popup.active .popup-content,
+.modal:not(.hidden) .modal-content {
+  opacity: 1;
+  transform: scale(1);
+}
+.popup-text {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+.popup-image-container {
+  flex-shrink: 0;
+  text-align: center;
+}
+.popup-img {
+  max-width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  display: inline-block;
+}
+
+/* Close button */
+.mac-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: #ff5f57;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  transition: background .2s;
+}
+/* Ajusta el botón para que quede centrado justo en la esquina */
+/* Posiciona la “×” fuera de la caja, en su esquina superior derecha */
+.modal-content .mac-close-btn {
+  position: absolute;
+  top: -16px;           /* ajusta según el radio de tu botón */
+  right: -16px;         /* mismo valor que top para centrar en la curva */
+  width: 32px;          /* tamaño de tu botón */
+  height: 32px;
+  border-radius: 50%;   /* círculo */
+  background: #ff5f5f;  /* rojo de cerrar */
+  color: #fff;
+  border: none;
+  font-size: 1.2rem;    /* ajusta para que la “×” quede centrada */
+  line-height: 32px;    /* idem */
+  text-align: center;
+  cursor: pointer;
+  z-index: 2;           /* por encima del contenido */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.mac-close-btn::before {
+  content: '×';
+  font-size: 20px;
+  color: #fff;
+  line-height: 1;
+}
+.mac-close-btn:hover {
+  background: #e5534f;
+}
+
+/* Bottom sheet (mobile) */
+.sheet-toggle,
+.bottom-sheet {
+  display: none;
+}
+#splash.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+/* Footer */
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: .1rem 0;
+  background: var(--bg);
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.1);
+  z-index: 5;
+}
+/* Formulario tipo email */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.contact-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+.contact-form label {
+  font-weight: bold;
+  margin-bottom: .25rem;
+}
+.contact-form input,
+.contact-form textarea {
+  padding: .5rem;
+  border: 1px solid #ccc;
+  border-radius: .25rem;
+  font: inherit;
+  background: var(--bg);
+  color: var(--text);
+}
+.send-btn {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--accent);
+  color: #fff;
+  padding: .5rem 1rem;
+  border: none;
+  border-radius: .25rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.send-btn:hover {
+  background: darken(var(--accent), 10%);
+}
+
+/* Iconos sociales */
+.social-icons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.social-icons a {
+  font-size: 1.5rem;
+  color: var(--fg);
+  transition: color .2s;
+}
+.social-icons a:hover {
+  color: var(--accent);
+}
+/* Nuevo: scroll solo en el cuerpo del form, no en todo el modal */
+.contact-body {
+  max-height: calc(90vh - 200px); /* ajusta 200px al alto ocupado por header, título y social-icons */
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+#sendMailBtn {
+  margin: 1rem auto;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+.btn {
+background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: .5rem 1rem;
+  margin-left: .5rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn:hover {
+  filter: brightness(0.9);
+}
+
+/* ——— Contenedores de modal y popup unificados ——— */
+.popup-content,
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  background: var(--bg);
+  color: var(--fg);
+  padding: 2rem;
+  border-radius: 8px;
+
+  /* auto-ajuste al contenido */
+   box-sizing: border-box;             /* incluye padding en el ancho */
+  width: clamp(200px, 90vw, 400px);   /* entre 200px y 400px, hasta el 90% de la pantalla */
+  max-width: 400px;
+  max-height: 80vh;
+
+  /* solo scroll vertical si hace falta */
+  overflow: visible;
+}
+
+/* animación de entrada */
+.modal:not(.hidden)  .modal-content,
+.popup.active        .popup-content {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity .2s, transform .2s;
+}
+
+/* posicionamiento del botón “×” */
+.modal-content .mac-close-btn,
+.popup-content .mac-close-btn {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  z-index: 999;
+  transform: none;
+}
+.lang-toggle {
+  background: none;
+  border: none;
+  color: var(--accent);       /* tu azul principal */
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin-left: .5rem;
+  transition: filter .2s;
+}
+.lang-toggle:hover {
+  filter: brightness(0.8);
+}
+/* — Vídeo splash de la firma (solo este bloque) — */
+#splashVideo {
+  width: clamp(300px, 80vw, 800px); /* más grande */
+  border-radius: 0;                /* sin bordes */
+  box-shadow: none;                /* sin sombra */
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+  font-size: 0;        /* elimina el texto residual */
+  color: transparent;  /* asegúrate de que no se vea nada */
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* Ocultar totalmente el splash al añadir .hidden */
+#splash.hidden {
+  opacity: 0;
+  visibility: hidden;  /* para quitarlo del flujo de tab/scroll */
+}
+/* — Dropdown de Publicaciones — */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-left: .5rem;
+}
+
+.dropdown-menu {
+  display: none;             /* oculto por defecto */
+  position: absolute;
+  top: 100%;                  /* justo debajo del botón */
+  left: 0;
+  background: var(--bg);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: .5rem 0;
+  min-width: 150px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+.dropdown-menu li {
+  list-style: none;
+}
+
+.dropdown-menu li + li {
+  margin-top: .25rem;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: .5rem 1rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: .9rem;
+}
+
+.dropdown-menu a:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Cuando el dropdown tiene la clase .open, mostramos el menú */
+.dropdown.open .dropdown-menu {
+  display: block;
+}
+/* — Fin de estilos para el dropdown — */
+/* — Fin de estilos para el modal y popup unificados — */
+/* — Fin de estilos para el splash screen — */
+/* — Fin de estilos para el footer — */
+/* 1) Ocultar header y nav de desktop */
+@media (max-width: 600px) {
+  /* — Estilos móviles solo hasta 600px de ancho — */
+  .gallery-container {
+    position: fixed;
+    top: 3.7rem;        /* debe ser la altura exacta de tu header móvil */
+    bottom: 2.5rem;       /* si tienes un footer de 3rem, o 0 si no hay footer */
+    left: 0;
+    right: 0;
+    overflow: visible;  /* que no recorte las imágenes cerca de los bordes */
+    touch-action: none; /* bloquea el scroll/pan nativo dentro */
+    z-index: 1;         /* por debajo del header, pero encima del resto */
+  }
+  /* 1) Ocultar header y nav de escritorio */
+  .header, 
+  .nav-controls, 
+  .filter-controls { 
+    display: none !important; 
+  }
+
+  /* 2) Mostrar header móvil */
+  /* — HEADER MÓVIL — */
+.mobile-header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--bg);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* Iconos (hamburguesa y lupa) */
+.mobile-icon-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: inline-flex;
+}
+
+/* Botón Home centrado */
+.mobile-home-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  flex: 1;
+  margin: 0 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+/* Ocultar el header de escritorio */
+.header, .nav-controls, .filter-controls {
+  display: none !important;
+}
+/* — Menú lateral móvil — */
+.mobile-nav {
+  position: fixed;
+  top: 3.5rem;            /* justo debajo del header móvil */
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 90;
+}
+.mobile-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+.mobile-nav li + li {
+  margin-top: 0.25rem;
+}
+.mobile-nav-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 1rem;
+  color: var(--fg);
+  cursor: pointer;
+}
+.mobile-nav-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.mobile-nav[hidden] { display: none; }
+.mobile-nav:not([hidden]) { display: block; }
+
+/* — Submenú Publicaciones — */
+.has-submenu .submenu-icon {
+  margin-left: .5rem;
+  transition: transform .3s;
+}
+
+.mobile-submenu {
+  display: none;
+  list-style: none;
+  padding-left: 1.5rem;  /* indentado para el submenú */
+  margin: 0.25rem 0 0 0;
+}
+
+.has-submenu.open .mobile-submenu {
+  display: block;
+}
+
+.has-submenu.open .submenu-icon {
+  transform: rotate(180deg);
+}
+
+/* Estilo de los enlaces del submenú */
+.mobile-submenu li + li {
+  margin-top: .25rem;
+}
+.mobile-submenu a {
+  display: block;
+  padding: .5rem 1rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: .95rem;
+}
+.mobile-submenu a:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+}
+/* Campo de búsqueda móvil (overlay) */
+.mobile-search {
+  position: fixed;
+  top: 0.5rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  background: var(--bg);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 200;
+  overflow: hidden;
+}
+.mobile-search input {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  font-size: 1rem;
+}
+.mobile-search button {
+  background: var(--accent);
+  border: none;
+  padding: 0 1rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+ /* El popup solo se muestra cuando tiene la clase .active */
+ #popup {
+   display: none;      /* oculto por defecto */
+ }
+ #popup.active {
+   display: flex;      /* solo visible cuando .active */
+ }
+ .popup {
+  padding: 1rem;  /* deja 1rem de espacio entre el popup-content y el borde */
+}
+/* ========================
+   BUSCADOR HEADER
+======================== */
+
+  .search-form {
+    display: flex;
+    background: var(--bg);
+    padding: 0.5rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 24rem;
+  }
+
+/* 1. Por defecto, el input está oculto */
+.search-form input {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* 2. Cuando el form tenga .active, mostramos el input */
+.search-form.active input {
+  display: inline-block;
+  width: 12rem;      /* mismo ancho que antes */
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+
+.search-form button {
+  margin-left: 0.5rem;
+}
+.search-container.hidden {
+  display: none !important;
+}
+/* 1. Oculta cualquier contenedor con la clase .hidden */
+.hidden {
+  display: none !important;
+}
+.search-container {
+  position: absolute;
+  top: 1rem;         /* desplázalo un poco hacia abajo desde el header */
+  left: 1rem;
+  right: 1rem;
+  z-index: 50;       /* encima de las imágenes, debajo del header */
+  display: flex;
+  justify-content: center;
+}
+
+/* —————————————————————————— */
+/* Transiciones splash ↔ contenido */
+/* —————————————————————————— */
+
+/* Splash ocupa toda la pantalla y tiene fade-out */
+.splash {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;           /* puedes usar var(--bg) */
+  opacity: 1;
+  transition: opacity 0.8s ease-out;
+  z-index: 10000;
+}
+.splash.hidden {
+  opacity: 0;
+  display: flex !important;  /* Anulamos el display:none */
+  pointer-events: none;
+}
+
+/* El contenido principal arranca invisible y hace fade-in */
+.main-content {
+  opacity: 0;
+  transition: opacity 0.8s ease-in;
+}
+.main-content.visible {
+  opacity: 1;
+}
+
+/* enlaces legales en footer, solo texto subrayado */
+.legal-link {
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color .2s;
+}
+.legal-link:hover {
+  color: #2563eb; /* mismo hover gray-700 o tu accent */
+}
+/* Aumentar letra de botones del header (escritorio) */
+@media (min-width: 768px) {
+  .filter-controls .filter-btn,
+  .nav-controls .btn,
+  .nav-controls .lang-toggle {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.3;
+  }
+}
