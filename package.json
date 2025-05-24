@@ -1,0 +1,46 @@
+{
+  "name": "optimizado-2",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "dev:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o dist/output.css --watch",
+    "build:css": "NODE_ENV=production  postcss src/input.css -o dist/output.css",
+    "purge:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o dist/output.purge.css",
+    "minify:css": "postcss src/input.css -o dist/output.purge.min.css --env production && cssnano dist/output.purge.css -o dist/output.purge.min.css",
+    "minify:js": "terser src/main.js --compress --mangle --output dist/main.min.js",
+    "optimize:images": "node scripts/optimize-images.js",
+    "build": "npm run build:css && npm run minify:js && npm run optimize:images"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/borjahz/optimizado.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/borjahz/optimizado/issues"
+  },
+  "homepage": "https://github.com/borjahz/optimizado#readme",
+  "description": "",
+  "devDependencies": {
+    "@ljharb/tsconfig": "^0.3.2",
+    "@tailwindcss/postcss": "^4.1.7",
+    "autoprefixer": "^10.4.21",
+    "imagemin": "^9.0.1",
+    "imagemin-avif": "^0.1.6",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^10.0.0",
+    "imagemin-webp": "^4.1.0",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "postcss-import": "^16.1.0",
+    "sharp": "^0.34.1",
+    "tailwindcss": "^4.1.7",
+    "terser": "^5.39.2",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.7"
+  }
+}
