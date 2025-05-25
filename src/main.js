@@ -64,7 +64,6 @@ window.addEventListener('load', () => {
   // >>> Forzamos atributos imprescindibles para autoplay en móvil:
   video.autoplay = true;
   video.muted = true;
-  video.loop = true;
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
   video.setAttribute('preload', 'auto');
