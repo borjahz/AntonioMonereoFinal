@@ -70,24 +70,21 @@ window.addEventListener('load', () => {
 
   // --- Opcional: arrancar sólo cuando haya suficiente buffer ---
   video.addEventListener('canplaythrough', () => {
-    video.play().then(() => {
-      console.log('▶ Vídeo reproduciéndose (móvil y escritorio)');
-    video.play().catch(err => {
-      console.warn('La reproducción automática no fue permitida:', err);
-    });
+  video.play().catch(err => {
+    console.warn('Autoplay bloqueado:', err);
   });
-  });
+});
 
   // Cuando el vídeo termina, lanzamos la transición cruzada
   video.addEventListener('ended', () => {
-    // inicia fade-out del splash
-    splash.classList.add('hidden');
-    // tras terminar la transición, quitamos splash y mostramos contenido
-    splash.addEventListener('transitionend', () => {
-      splash.remove();
-      mainContent.classList.add('visible');
-    }, { once: true });
-  });
+  splash.addEventListener('transitionend', () => {
+    splash.remove();
+    mainContent.classList.add('visible');
+  }, { once: true });
+
+  // ahora ocultamos
+  splash.classList.add('hidden');
+});
 
   // Fallback: por si 'ended' no se dispara (carga slow)
   video.addEventListener('loadedmetadata', () => {
