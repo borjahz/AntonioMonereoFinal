@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "dev:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o dist/output.css --watch",
-    "build:css": "NODE_ENV=production  postcss src/input.css -o dist/output.css",
+    "dev:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o docs/dist/output.css --watch",
+    "build:css": "NODE_ENV=production  postcss src/input.css -o docs/dist/output.css",
     "purge:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o dist/output.purge.css",
-    "minify:css": "postcss src/input.css -o dist/output.purge.min.css --env production && cssnano dist/output.purge.css -o dist/output.purge.min.css",
-    "minify:js": "terser src/main.js --compress --mangle --output dist/main.min.js",
+    "minify:css": "postcss src/input.css -o docs/dist/output.purge.min.css --env production && cssnano docs/dist/output.purge.css -o dist/output.purge.min.css",
+    "minify:js": "terser src/main.js --compress --mangle --output docs/dist/main.min.js",
     "optimize:images": "node scripts/optimize-images.js",
     "build": "npm run build:css && npm run minify:js && npm run optimize:images"
   },
