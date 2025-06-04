@@ -92,27 +92,6 @@
   </div>
 </footer>
 
-<script>
-  // Rellenar año actual
-  document.getElementById('currentYear').textContent = new Date().getFullYear();
-</script>
-<!-- Modal de Cookies personalizado -->
-<div id="cookieModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle">
-  <div class="modal-content">
-    <button id="cookieCloseBtn" class="mac-close-btn" aria-label="Cerrar"></button>
-    <h2 id="cookieModalTitle" class="text-2xl font-semibold mb-4">Política de Cookies</h2>
-    <p class="mb-6">
-      Utilizamos cookies propias y de terceros para mejorar tu experiencia y medir el uso de la web.
-      ¿Aceptas el uso de cookies analíticas?
-    </p>
-    <div class="flex justify-center space-x-4">
-      <button id="acceptCookies" class="btn">Aceptar</button>
-      <button id="denyCookies" class="btn" style="background: #6b7280;">Rechazar</button>
-    </div>
-  </div>
-</div>
-<body>
-
   <!-- Splash Screen -->
   <div id="splash" class="splash">
   <video
@@ -343,6 +322,7 @@
       fetchpriority="low"
       alt="Retrato de Gijón"
       data-description="Retrato de Gijón."  
+      data-popup-src="dist/images/Gijon_real.JPG.webp"
       tabindex="0"
     />
   </picture>

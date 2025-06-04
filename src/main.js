@@ -158,12 +158,55 @@ function toggleDark() {
 function showPop(i) {
   console.log('🔔 showPop invocado para', i.id);
   const pop = document.getElementById('popup');
-  document.getElementById('popupImage').src             = i.src;
-  document.getElementById('popupTitle').textContent     = i.alt;
-  document.getElementById('popupDescription').textContent = i.dataset.description;
+  const imgTag = document.getElementById('popupImage');
+  const titleTag= document.getElementById('popupTitle');
+  const descTag= document.getElementById('popupDescription');
+  // Comprueba si existe data-popup-src; si no, usa la miniatura (i.src)
+  const nuevaSrc = i.dataset.popupSrc || i.src;
+  imgTag.src     = nuevaSrc;
+
+  titleTag.textContent = i.alt;
+  descTag.textContent  = i.dataset.description;
   pop.classList.add('active');
 }
+// --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------
+
+// 1) Referencia al <img> del popup
+const popupImg = document.getElementById('popupImage');
+
+// 2) Listener de doble clic en escritorio
+popupImg.addEventListener('dblclick', () => {
+  if (!document.fullscreenElement) {
+    popupImg.requestFullscreen().catch(err => {
+      console.error(`Error al pedir fullscreen: ${err.message}`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+// 3) Listener de “double-tap” en móvil (touchend)
+let lastTap = 0;
+popupImg.addEventListener('touchend', e => {
+  const currentTime = new Date().getTime();
+  const tapLength   = currentTime - lastTap;
+  if (tapLength < 300 && tapLength > 0) {
+    // Double-tap detectado: toggle fullscreen
+    if (!document.fullscreenElement) {
+      popupImg.requestFullscreen().catch(err => {
+        console.error(`Error al pedir fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+  lastTap = currentTime;
+});
 function closePop() {
+   // Si estamos en pantalla completa, salimos primero
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
   document.getElementById('popup').classList.remove('active');
 }
 
