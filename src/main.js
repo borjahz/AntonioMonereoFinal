@@ -169,39 +169,6 @@ function showPop(i) {
   descTag.textContent  = i.dataset.description;
   pop.classList.add('active');
 }
-// --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------
-
-// 1) Referencia al <img> del popup
-const popupImg = document.getElementById('popupImage');
-
-// 2) Listener de doble clic en escritorio
-popupImg.addEventListener('dblclick', () => {
-  if (!document.fullscreenElement) {
-    popupImg.requestFullscreen().catch(err => {
-      console.error(`Error al pedir fullscreen: ${err.message}`);
-    });
-  } else {
-    document.exitFullscreen();
-  }
-});
-
-// 3) Listener de “double-tap” en móvil (touchend)
-let lastTap = 0;
-popupImg.addEventListener('touchend', e => {
-  const currentTime = new Date().getTime();
-  const tapLength   = currentTime - lastTap;
-  if (tapLength < 300 && tapLength > 0) {
-    // Double-tap detectado: toggle fullscreen
-    if (!document.fullscreenElement) {
-      popupImg.requestFullscreen().catch(err => {
-        console.error(`Error al pedir fullscreen: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  }
-  lastTap = currentTime;
-});
 function closePop() {
    // Si estamos en pantalla completa, salimos primero
   if (document.fullscreenElement) {
@@ -625,6 +592,38 @@ if ('ontouchstart' in window) {
   // Dinámico
   document.getElementById('currentYear').textContent = new Date().getFullYear();
   
+// --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------
 
+// 1) Referencia al <img> del popup
+const popupImg = document.getElementById('popupImage');
+
+// 2) Listener de doble clic en escritorio
+popupImg.addEventListener('dblclick', () => {
+  if (!document.fullscreenElement) {
+    popupImg.requestFullscreen().catch(err => {
+      console.error(`Error al pedir fullscreen: ${err.message}`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+// 3) Listener de “double-tap” en móvil (touchend)
+let lastTap = 0;
+popupImg.addEventListener('touchend', e => {
+  const currentTime = new Date().getTime();
+  const tapLength   = currentTime - lastTap;
+  if (tapLength < 300 && tapLength > 0) {
+    // Double-tap detectado: toggle fullscreen
+    if (!document.fullscreenElement) {
+      popupImg.requestFullscreen().catch(err => {
+        console.error(`Error al pedir fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+  lastTap = currentTime;
+});
 });
 
