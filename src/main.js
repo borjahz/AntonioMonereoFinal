@@ -167,6 +167,31 @@ function showPop(i) {
 
   titleTag.textContent = i.alt;
   descTag.textContent  = i.dataset.description;
+    // 3) Limpiar la lista de detalles (para evitar duplicados de popups anteriores)
+  detalleLista.innerHTML = '';
+
+  // 4) Leer atributos específicos de la miniatura
+  const tecnica    = i.dataset.detailTecnica    || 'No disponible';
+  const medidas    = i.dataset.detailMedidas    || 'No disponible';
+  const ano        = i.dataset.detailAno        || 'No disponible';
+  const proceso    = i.dataset.detailProceso    || 'No disponible';
+  const inspiracion = i.dataset.detailInspiracion || 'No disponible';
+
+  // 5) Crear cinco elementos <li> con cada detalle
+  const items = [
+    `Técnica: ${tecnica}`,
+    `Medidas: ${medidas}`,
+    `Año de ejecución: ${ano}`,
+    `Proceso creativo: ${proceso}`,
+    `Inspiración: ${inspiracion}`
+  ];
+
+  items.forEach(texto => {
+    const li = document.createElement('li');
+    li.textContent = texto;
+    detalleLista.appendChild(li);
+  });
+
   pop.classList.add('active');
 }
 function closePop() {

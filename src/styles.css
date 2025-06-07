@@ -208,32 +208,34 @@ body.dark {
 .modal:not(.hidden) {
   display: flex;
 }
+/* === Primera parte: estilos generales para popup/desktop === */
 .popup-content,
 .modal-content {
-  position: relative;
+   position: relative;              
   display: flex;
-  flex-direction: column;
-  align-items: center;       /* centro el contenido */
-  text-align: center;        /* centrar texto e iconos */
-  background: var(--bg);
+  flex-direction: row;             /* Fila: imagen izda + texto dcha en pantallas grandes */
+  align-items: flex-start;
+  text-align: left;                
+  background: var(--bg);           /* blanco (o tu variable de color) */
   color: var(--fg);
-  padding: 2rem;
-  border-radius: 8px;
-
-  /* ============================
-     MODAL AUTO-AJUSTABLE
-  ============================ */
-  width: auto;               /* que crezca al contenido */
-  max-width: 400px;          /* hasta 400px de ancho */
-  min-width: 200px;          /* no menor a 200px */
-  max-height: 80vh;          /* evita salirse verticalmente */
-  overflow-y: auto;          /* scroll interno si es necesario */
-  overflow-x: hidden;        /* no scroll horizontal */
-  /* ============================ */
-
+  padding: 1.5rem;                 /* separación interna, reducimos un poco para pulir */
+  border-radius: 0.5rem;           /* 8px */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* sombra suave */
+  
+  /* Ancho automático hasta un máximo en escritorio */
+  box-sizing: border-box;
+  width: auto;
+  max-width: 800px;                /* Máximo 800px en escritorio */
+  min-width: 300px;                /* Un ancho mínimo razonable */
+  max-height: 80vh;                /* No sobrepase el 80% de altura de la pantalla */
+  overflow-y: auto;                /* Scroll si el texto es muy largo */
+  overflow-x: hidden;
+  
   opacity: 0;
-  transform: scale(0.9);
-  transition: opacity .2s, transform .2s;
+  transform: scale(0.95);
+  transition: 
+    opacity 0.18s ease-out, 
+    transform 0.18s ease-out;      /* Animación suave al abrir */
 }
 .popup.active .popup-content,
 .modal:not(.hidden) .modal-content {
@@ -241,18 +243,22 @@ body.dark {
   transform: scale(1);
 }
 .popup-text {
-  flex-grow: 1;
-  overflow-y: auto;
+  flex: 1;                         /* ocupa el espacio restante */
+  overflow-y: auto;                /* scroll interno si el contenido excede en altura */
+  color: var(--fg);
 }
 .popup-image-container {
-  flex-shrink: 0;
+ flex-shrink: 0;
+  margin-right: 1.5rem;  /* <-- separación en escritorio */
   text-align: center;
 }
 .popup-img {
-  max-width: 100%;
-  max-height: 50vh;
+ max-width: 350px;                /* limita un poco más la imagen para que no sea gigantesca */
+  max-height: 60vh;                /* proporcional en altura */
   object-fit: contain;
-  display: inline-block;
+  display: block;
+  border-radius: 0.25rem;           /* 4px, pequeño redondeo en la imagen */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* sombra muy sutil sobre la imagen */
 }
 
 /* Close button */
@@ -269,7 +275,7 @@ body.dark {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 20;
+  z-index: 1200;
   transition: background .2s;
 }
 /* Ajusta el botón para que quede centrado justo en la esquina */
@@ -288,7 +294,7 @@ body.dark {
   line-height: 32px;    /* idem */
   text-align: center;
   cursor: pointer;
-  z-index: 2;           /* por encima del contenido */
+  z-index: 1;           /* por encima del contenido */
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .mac-close-btn::before {
@@ -404,30 +410,6 @@ background: var(--accent);
   filter: brightness(0.9);
 }
 
-/* ——— Contenedores de modal y popup unificados ——— */
-.popup-content,
-.modal-content {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-
-  background: var(--bg);
-  color: var(--fg);
-  padding: 2rem;
-  border-radius: 8px;
-
-  /* auto-ajuste al contenido */
-   box-sizing: border-box;             /* incluye padding en el ancho */
-  width: clamp(200px, 90vw, 400px);   /* entre 200px y 400px, hasta el 90% de la pantalla */
-  max-width: 400px;
-  max-height: 80vh;
-
-  /* solo scroll vertical si hace falta */
-  overflow: visible;
-}
-
 /* animación de entrada */
 .modal:not(.hidden)  .modal-content,
 .popup.active        .popup-content {
@@ -442,7 +424,7 @@ background: var(--accent);
   position: absolute;
   top: -16px;
   right: -16px;
-  z-index: 999;
+  z-index: 1200;
   transform: none;
 }
 .lang-toggle {
@@ -793,7 +775,31 @@ background: var(--accent);
 .main-content.visible {
   opacity: 1;
 }
-
+@media (max-width: 600px) {
+.popup-content,
+  .modal-content {
+    flex-direction: column;         /* apilado vertical: primero imagen, luego texto */
+    align-items: center;
+    text-align: center;
+    padding: 1rem;                  /* menos padding en móvil */
+    width: clamp(260px, 90vw, 360px); /* ancho entre 260px y 360px, adaptado a la pantalla */
+    max-width: 360px;               
+    min-width: 260px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .popup-image-container {
+    margin-right: 0;                /* ya no hay texto a la derecha */
+    margin-bottom: 1rem;            /* separación entre imagen y texto en móvil */
+  }
+  .popup-img {
+    max-width: 100%;                /* que ocupe todo el ancho posible */
+    max-height: 45vh;               
+  }
+  .popup-text {
+    padding: 0 0.5rem;              /* un pequeño espacio lateral en móvil */
+  }
+}
 /* enlaces legales en footer, solo texto subrayado */
 .legal-link {
   text-decoration: underline;
@@ -811,4 +817,27 @@ background: var(--accent);
     font-size: 1.125rem; /* 18px */
     line-height: 1.3;
   }
+}
+/* ===== Estilos para la lista de detalles de la obra ===== */
+/* 7) Detalles de la obra: un estilo más limpio */
+.obra-detalles {
+  margin-top: 1rem;
+}
+.obra-detalles h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;              /* ligeramente más grande */
+  font-weight: 600;                /* seminegrita */
+  color: var(--fg);
+  text-align: left;                /* alineado a la izquierda */
+}
+.obra-detalles ul {
+  list-style: disc;
+  padding-left: 1.25rem;           /* igual que antes para viñetas */
+  margin: 0.5rem 0;
+}
+.obra-detalles ul li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--fg);
 }
