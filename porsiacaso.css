@@ -215,7 +215,6 @@ body.dark {
   display: flex;
   flex-direction: row;             /* Fila: imagen izda + texto dcha en pantallas grandes */
   align-items: flex-start;
-  gap: 2rem;   
   text-align: left;                
   background: var(--bg);           /* blanco (o tu variable de color) */
   color: var(--fg);
@@ -230,7 +229,7 @@ body.dark {
   min-width: 300px;                /* Un ancho mínimo razonable */
   max-height: 80vh;                /* No sobrepase el 80% de altura de la pantalla */
   overflow-y: auto;                /* Scroll si el texto es muy largo */
-  overflow-x: visible;
+  overflow-x: hidden;
   
   opacity: 0;
   transform: scale(0.95);
@@ -243,7 +242,11 @@ body.dark {
   opacity: 1;
   transform: scale(1);
 }
-
+.popup-text {
+  flex: 1;                         /* ocupa el espacio restante */
+  overflow-y: auto;                /* scroll interno si el contenido excede en altura */
+  color: var(--fg);
+}
 .popup-image-container {
  flex-shrink: 0;
   margin-right: 1.5rem;  /* <-- separación en escritorio */
@@ -363,9 +366,9 @@ body.dark {
   transition: background .2s;
 }
 .send-btn:hover {
- /* darken() is non standard, use brightness filter for compatibility */
-  filter: brightness(0.9);
+  background: darken(var(--accent), 10%);
 }
+
 /* Iconos sociales */
 .social-icons {
   display: flex;
@@ -775,7 +778,6 @@ background: var(--accent);
 @media (max-width: 600px) {
 .popup-content,
   .modal-content {
-
     flex-direction: column;         /* apilado vertical: primero imagen, luego texto */
     align-items: center;
     text-align: center;

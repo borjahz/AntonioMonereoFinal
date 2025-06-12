@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const path  = require('path');
 
 const INPUT_DIR  = 'src/images';          // Ajusta si tu carpeta es distinta
-const OUTPUT_DIR = 'docs/dist/images';  // Ya dentro de public/dist
+const OUTPUT_DIR = 'docs/dist/images';  // Destination folder inside docs/dist
 
 (async () => {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });

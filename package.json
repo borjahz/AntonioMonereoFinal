@@ -1,7 +1,7 @@
 {
   "name": "optimizado-2",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "docs/dist/main.min.js",
   "scripts": {
     "dev:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o docs/dist/output.css --watch",
     "build:css": "NODE_ENV=production  postcss src/input.css -o docs/dist/output.css",
@@ -35,12 +35,16 @@
     "postcss": "^8.5.3",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.0",
+    "prettier": "^3.5.3",
     "sharp": "^0.34.1",
+    "stylelint": "^16.20.0",
+    "stylelint-order": "^7.0.0",
     "tailwindcss": "^4.1.7",
     "terser": "^5.39.2",
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.7"
+    "@tailwindcss/vite": "^4.1.7",
+    "purify-css": "^1.2.5"
   }
 }

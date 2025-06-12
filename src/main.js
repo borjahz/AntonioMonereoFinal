@@ -103,7 +103,7 @@ const defaultPositions = {};
 const darkKey = 'fs_dark';
 const keyStep = 10;
 let state = { el: null, sx: 0, sy: 0, ox: 0, oy: 0, lt: null };
-
+const DEBUG = false;
 function getRect() {
   return document.querySelector('.gallery-container').getBoundingClientRect();
 }
@@ -161,6 +161,7 @@ function showPop(i) {
   const imgTag = document.getElementById('popupImage');
   const titleTag= document.getElementById('popupTitle');
   const descTag= document.getElementById('popupDescription');
+  const detalleLista = document.getElementById('detalleLista');
   // Comprueba si existe data-popup-src; si no, usa la miniatura (i.src)
   const nuevaSrc = i.dataset.popupSrc || i.src;
   imgTag.src     = nuevaSrc;
@@ -252,6 +253,7 @@ function closePop() {
     // — Toggle del menú de Publicaciones —
 const pubBtn  = document.getElementById('pubBtn');
 const pubMenu = document.getElementById('pubMenu');
+const bottomSheet = document.getElementById('bottomSheet');
 
 // Al hacer clic, alternar la clase "open" en el contenedor .dropdown
 pubBtn.addEventListener('click', e => {
@@ -573,8 +575,6 @@ load();
         state.el = null;
       }
     };
-
-    i.ondblclick = () => showPop(i);
 // — Tap sencillo en móvil para abrir popup —
 // 1) dejamos intacto el dblclick para escritorio
 i.ondblclick = () => showPop(i);
