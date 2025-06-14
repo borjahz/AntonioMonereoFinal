@@ -229,7 +229,7 @@ body.dark {
   max-width: 800px;                /* Máximo 800px en escritorio */
   min-width: 300px;                /* Un ancho mínimo razonable */
   max-height: 80vh;                /* No sobrepase el 80% de altura de la pantalla */
-  overflow-y: auto;                /* Scroll si el texto es muy largo */
+  overflow-y: visible;                /* Scroll si el texto es muy largo */
   overflow-x: visible;
   
   opacity: 0;

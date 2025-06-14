@@ -70,8 +70,8 @@ window.addEventListener('load', () => {
 
   // --- Opcional: arrancar sólo cuando haya suficiente buffer ---
   video.addEventListener('canplaythrough', () => {
-  video.play().catch(err => {
-    console.warn('Autoplay bloqueado:', err);
+  video.play().catch(() => {
+    /* Autoplay might be blocked; ignore the error */
   });
 });
 
