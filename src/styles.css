@@ -226,9 +226,9 @@ body.dark {
   /* Ancho automático hasta un máximo en escritorio */
   box-sizing: border-box;
   width: auto;
-  max-width: 800px;                /* Máximo 800px en escritorio */
+  max-width: 1000px;                /* Máximo 800px en escritorio */
   min-width: 300px;                /* Un ancho mínimo razonable */
-  max-height: 80vh;                /* No sobrepase el 80% de altura de la pantalla */
+  max-height: 90vh;                /* No sobrepase el 80% de altura de la pantalla */
   overflow-y: visible;                /* Scroll si el texto es muy largo */
   overflow-x: visible;
   
@@ -829,8 +829,8 @@ background: var(--accent);
   text-align: left;                /* alineado a la izquierda */
 }
 .obra-detalles ul {
-  list-style: disc;
-  padding-left: 1.25rem;           /* igual que antes para viñetas */
+   list-style: none;                /* sin viñetas para historia */
+  padding-left: 0;                 /* sin indentación */         /* igual que antes para viñetas */
   margin: 0.5rem 0;
 }
 .obra-detalles ul li {

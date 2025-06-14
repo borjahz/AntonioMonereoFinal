@@ -167,32 +167,37 @@ function showPop(i) {
   imgTag.src     = nuevaSrc;
 
   titleTag.textContent = i.alt;
-  descTag.textContent  = i.dataset.description;
+    // Permitir saltos de línea o HTML sencillo en la descripción
+  descTag.innerHTML = (i.dataset.description || '').replace(/\n/g, '<br>');
     // 3) Limpiar la lista de detalles (para evitar duplicados de popups anteriores)
   detalleLista.innerHTML = '';
 
-  // 4) Leer atributos específicos de la miniatura
-  const tecnica    = i.dataset.detailTecnica    || 'No disponible';
-  const medidas    = i.dataset.detailMedidas    || 'No disponible';
-  const ano        = i.dataset.detailAno        || 'No disponible';
-  const proceso    = i.dataset.detailProceso    || 'No disponible';
-  const inspiracion = i.dataset.detailInspiracion || 'No disponible';
-
-  // 5) Crear cinco elementos <li> con cada detalle
-  const items = [
-    `Técnica: ${tecnica}`,
-    `Medidas: ${medidas}`,
-    `Año de ejecución: ${ano}`,
-    `Proceso creativo: ${proceso}`,
-    `Inspiración: ${inspiracion}`
-  ];
-
-  items.forEach(texto => {
+ const story = i.dataset.detailStory;
+  if (story) {
     const li = document.createElement('li');
-    li.textContent = texto;
+    li.textContent =story;
     detalleLista.appendChild(li);
-  });
+ } else {
+    const tecnica    = i.dataset.detailTecnica    || 'No disponible';
+    const medidas    = i.dataset.detailMedidas    || 'No disponible';
+    const ano        = i.dataset.detailAno        || 'No disponible';
+    const proceso    = i.dataset.detailProceso    || 'No disponible';
+    const inspiracion = i.dataset.detailInspiracion || 'No disponible';
 
+    const items = [
+      `Técnica: ${tecnica}`,
+      `Medidas: ${medidas}`,
+      `Año de ejecución: ${ano}`,
+      `Proceso creativo: ${proceso}`,
+      `Inspiración: ${inspiracion}`
+    ];
+
+    items.forEach(texto => {
+      const li = document.createElement('li');
+      li.textContent = texto;
+      detalleLista.appendChild(li);
+    });
+  }
   pop.classList.add('active');
 }
 function closePop() {
