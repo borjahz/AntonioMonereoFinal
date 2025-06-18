@@ -38,25 +38,55 @@ function initCookieModal() {
   });
 }
 function setupLegalModals() {
-  document.querySelectorAll('[data-modal]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const modalId = btn.getAttribute('data-modal');
-      document.getElementById(modalId).classList.remove('hidden');
+  // Abrir modales
+  document.querySelectorAll('[data-modal]').forEach(trigger => {
+    const modalId = trigger.getAttribute('data-modal');
+    const modal = document.getElementById(modalId);
+    const closeBtn = modal.querySelector('[data-close]');
+    trigger.addEventListener('click', event => {
+      event.preventDefault();
+      // Mostrar
+      modal.classList.remove('hidden');
+      modal.classList.add('active');
+      // Aria
+      trigger.setAttribute('aria-expanded', 'true');
+      // Focus en el botón de cerrar
+      closeBtn.focus();
     });
   });
-  document.querySelectorAll('[data-close]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      btn.closest('.modal').classList.add('hidden');
+
+  // Cerrar modales
+  document.querySelectorAll('[data-close]').forEach(closeBtn => {
+    const modal = closeBtn.closest('.modal');
+    const triggerId = modal.id && document.querySelector(`[data-modal="${modal.id}"]`);
+    closeBtn.addEventListener('click', () => {
+      // Ocultar
+      modal.classList.remove('active');
+      modal.classList.add('hidden');
+      // Aria
+      if (triggerId) triggerId.setAttribute('aria-expanded', 'false');
+      // Devolver foco al disparador
+      triggerId && triggerId.focus();
     });
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.active').forEach(modal => {
+        modal.classList.remove('active');
+        modal.classList.add('hidden');
+        const trigger = document.querySelector(`[data-modal="${modal.id}"]`);
+        if (trigger) {
+          trigger.setAttribute('aria-expanded', 'false');
+          trigger.focus();
+        }
+      });
+    }
   });
 }
-
-// Dentro de window.load:
-window.addEventListener('load', () => {
-  initCookieModal();
-  setupLegalModals();
   // …el resto de tu init para splash/galería, etc.
-
+window.addEventListener('load', () => {
   const splash      = document.getElementById('splash');
   const video       = document.getElementById('splashVideo');
   const mainContent = document.getElementById('mainContent');
@@ -212,6 +242,8 @@ function closePop() {
 // ——— Main initialization ———
 
   document.addEventListener('DOMContentLoaded', () => {
+  initCookieModal();
+   setupLegalModals();
 
     localStorage.removeItem(dataKey);
       // ——— Textos traducibles ———
@@ -473,7 +505,7 @@ searchForm.addEventListener('submit', e => {
   // Dark mode persistente
   if (localStorage.getItem(darkKey) === 'true') document.body.classList.add('dark');
   darkBtn.onclick = toggleDark;
-  // Modal About
+  /* Modal About
   aboutBtn.addEventListener('click', e => {
      e.preventDefault();
      aboutSec.classList.remove('hidden');
@@ -523,7 +555,7 @@ document.addEventListener('keydown', e => {
       if (pop.classList.contains('active')) closePop();
     }
   });
-
+*/
   // — CONFIGURAR IMÁGENES DRAG & POPUP —  
   const imgs = Array.from(document.querySelectorAll('.draggable'));
   imgs.forEach(img => {

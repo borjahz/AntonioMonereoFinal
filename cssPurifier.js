@@ -10,5 +10,7 @@ const options = {
 };
 
 purify(content, css, options, function (purifiedAndMinifiedResult){
-    console.log(purifiedAndMinifiedResult);
+  if (process.env.NODE_ENV !== 'production') {
+        console.log(purifiedAndMinifiedResult);
+    }
 });

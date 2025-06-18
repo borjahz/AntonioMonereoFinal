@@ -24,6 +24,7 @@
       
 </head>
 <body>
+ 
 <!-- Modal de Cookies personalizado -->
 <div id="cookieModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle">
   <div class="modal-content">
@@ -175,12 +176,11 @@
     <nav class="nav-controls" aria-label="Navegación principal">
       <button id="langToggle" class="lang-toggle">ESP/EN</button>
       <button id="aboutBtn" class="btn"
-               aria-controls="aboutSection" aria-expanded="false" data-i18n="about">
+               aria-controls="aboutSection" data-modal="aboutSection" aria-expanded="false" data-i18n="about">
         Info
        </button>
          <button id="contactBtn" class="btn"
-         aria-controls="contactSection"
-         aria-expanded="false" data-i18n="contact">
+         aria-controls="contactSection" data-modal="contactSection" aria-expanded="false" data-i18n="contact">
    Contacto
  </button>
   <!-- Botón de Publicaciones con menú desplegable -->
@@ -380,9 +380,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
     </button>
   </form>
 </div>
-  </main>
-
-  <!-- Image popup -->
+ <!-- Image popup -->
   <div id="popup" class="popup" role="dialog" aria-modal="true"
        aria-hidden="true" aria-labelledby="popupTitle">
     <div class="popup-content">
@@ -399,6 +397,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
           <ul id="detalleLista">
           </ul>
       </div>
+      </div>
     </div>
   </div>
 
@@ -406,7 +405,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
   <div id="aboutSection" class="modal hidden" role="dialog" aria-modal="true"
        aria-labelledby="aboutTitle">
     <div class="modal-content">
-      <button id="closeAbout" class="mac-close-btn" aria-label="Cerrar about"></button>
+      <button id="closeAbout" class="mac-close-btn" data-close aria-label="Cerrar about"></button>
       <h2 id="aboutTitle" data-i18n="aboutTitle">About Family Style</h2>
       <p id="aboutInfo" data-i18n="aboutInfo">Somos un estudio de branding que crea identidades únicas y memorables.</p>
     </div>
@@ -415,7 +414,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
 <div id="contactSection" class="modal hidden"
      role="dialog" aria-modal="true" aria-labelledby="contactTitle">
   <div class="modal-content">
-    <button id="closeContact" class="mac-close-btn"
+    <button id="closeContact" class="mac-close-btn" data-close 
             aria-label="Cerrar contacto"></button>
     <h2 id="contactTitle" data-i18n="contactTitle">Envíanos un email</h2>
      <button id="sendMailBtn" class="btn">
@@ -433,6 +432,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
     </div>
   </div>
 </div>
+  </main>
 <script>
   // Rellenar año actual
   document.getElementById('currentYear').textContent = new Date().getFullYear();
