@@ -877,9 +877,14 @@ background: var(--accent);
   .popup-content,
   .modal-content {
     position: relative !important;
-    max-height: calc(100vh - 4rem) !important;  /* deja hueco para tu header */
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    /* restamos header (4rem) + footer (3rem) */
+   max-height: calc(100vh - 4rem - 3rem) !important;
+     overflow-y: auto !important;
+     overflow-x: hidden !important;
+  }
+   /* empuja hacia arriba el contenido para no quedar bajo el footer */
+  .popup {
+    padding-bottom: 5rem;  /* igual a la altura del footer */
   }
 
   /* 2) La X siempre dentro, en la esquina superior derecha */
