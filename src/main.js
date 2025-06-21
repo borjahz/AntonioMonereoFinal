@@ -251,14 +251,14 @@ function closePop() {
     // Nav / modales
     about:           { es: 'Info',             en: 'About' },
     contact:         { es: 'Contacto',          en: 'Contact' },
-    aboutTitle:      { es: 'Sobre Family Style',en: 'About Family Style' },
+    aboutTitle:      { es: 'Sobre Antonio Monereo',en: 'About Antonio Monereo' },
     contactTitle:    { es: 'Envíanos un email',  en: 'Send us an email' },
     close:           { es: 'Cerrar',            en: 'Close' },
-    aboutInfo:     { es: 'Family Style es un estudio de diseño y desarrollo web.', en: 'Family Style is a web design and development studio.' },
+    aboutInfo:     { es: 'Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentró muy pronto en el mundo del arte: comenzó a dibujar desde niño, ganó un primer premio en el certamen "Toledo desde el Alcázar" (2016) y desde 2019 ejerce como uno de los copistas más jóvenes del Museo del Prado. Su acercamiento al arte es profundamente clásico, con una destacada técnica académica, pero también muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.',
+       en: 'Antonio Monereo (Madrid, 2001) is a young painter and draftsman who studied Fine Arts at the Complutense University and Art History at the UNED. He discovered his passion for art early on, began drawing as a child, won first prize in the "Toledo from the Alcázar" contest in 2016, and has been one of the youngest official copyists at the Prado Museum since 2019. His approach to art is deeply classical, with a strong academic technique, yet also deeply personal: in interviews, he has shared that painting has been both a refuge and a way to affirm his identity and find his place in the world.' },
     pubBtn:         { es: 'Publicaciones',    en: 'Publications' },
     Shangay:      { es: 'Entrevista Shangay',         en: 'Shangay Interview' },
     Telemadrid: { es: 'Entrevista Telemadrid',        en: 'Telemadrid Interview' },
-    Elbloque:   { es: 'Exposición El Bloque',          en: 'El Bloque Exhibition' },
     // Filtros
     filterAll:       { es: 'Antonio Monereo',  en: 'Antonio Monereo' },
     filterCopies:    { es: 'Copias',           en: 'Copies' },

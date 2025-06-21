@@ -415,15 +415,6 @@ background: var(--accent);
   transition: opacity .2s, transform .2s;
 }
 
-/* posicionamiento del botón “×” */
-.modal-content .mac-close-btn,
-.popup-content .mac-close-btn {
-  position: absolute;
-  top: -16px;
-  right: -16px;
-  z-index: 1200;
-  transform: none;
-}
 .lang-toggle {
   background: none;
   border: none;
@@ -537,16 +528,7 @@ background: var(--accent);
   .filter-controls { 
     display: none !important; 
   }
-  /* 2) Convierte el botón en “sticky” */
-  .popup-content .mac-close-btn,
-  .modal-content .mac-close-btn {
-    position: sticky;
-    top: 0;              /* se pega al tope del popup */
-    align-self: flex-end;/* se alinea a la derecha */
-    margin: 8px;         /* separa el botón del borde y respeta el border-radius */
-    z-index: 1200;       /* por encima de todo el contenido */
-  }
-
+  
   /* 2) Mostrar header móvil */
   /* — HEADER MÓVIL — */
 .mobile-header {
@@ -867,4 +849,57 @@ background: var(--accent);
   font-size: 1rem;
   line-height: 1.4;
   color: var(--fg);
+}
+/* after your existing styles */
+/* 1) Stack title + text vertically, center them, and tighten the gap */
+#aboutSection .modal-content {
+  flex-direction: column !important;
+  align-items: center   !important;  /* centre hijos horizontalmente */
+  gap:           0.5rem  !important;  /* menos espacio entre h2 y p */
+}
+
+/* 2) Asegúrate de que el título no traiga un margin excesivo */
+#aboutSection h2 {
+  margin: 0 0 0.3rem;   /* solo un pequeño margen inferior */
+  text-align: center;   /* centra también el texto del h2 */
+}
+/* ───────────────────────────────────────────────────────────
+   Mobile: close-button always circle in top-right corner
+   ─────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   MÓVIL (≤640px): botón “×” siempre círculo en esquina real
+   ───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────
+   MÓVIL (≤640px): X dentro del popup y scroll en el propio popup
+   ───────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* 1) El popup/modal scrolla verticalmente */
+  .popup-content,
+  .modal-content {
+    position: relative !important;
+    max-height: calc(100vh - 4rem) !important;  /* deja hueco para tu header */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  /* 2) La X siempre dentro, en la esquina superior derecha */
+  .popup-content .mac-close-btn,
+  .modal-content .mac-close-btn {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+  }
+
+  /* 3) Asegura que la “×” vaya centrada */
+  .popup-content .mac-close-btn::before,
+  .modal-content .mac-close-btn::before {
+    font-size: 20px;
+    line-height: 32px;
+    color: #fff;
+  }
 }
