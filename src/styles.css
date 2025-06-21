@@ -511,6 +511,15 @@ background: var(--accent);
 /* — Fin de estilos para el footer — */
 /* 1) Ocultar header y nav de desktop */
 @media (max-width: 600px) {
+  /* 1) Alineamos el overlay al top */
+  .popup,
+  .modal {
+    display: flex;             /* debería ya tenerlo */
+    justify-content: center;   /* centrado horizontal */
+    align-items: flex-start;   /* pegado arriba */
+    padding: 0;
+    z-index: 1000;             /* quitamos cualquier padding extra */
+  }
   /* — Estilos móviles solo hasta 600px de ancho — */
   .gallery-container {
     position: fixed;
@@ -527,6 +536,15 @@ background: var(--accent);
   .nav-controls, 
   .filter-controls { 
     display: none !important; 
+  }
+  /* 2) Convierte el botón en “sticky” */
+  .popup-content .mac-close-btn,
+  .modal-content .mac-close-btn {
+    position: sticky;
+    top: 0;              /* se pega al tope del popup */
+    align-self: flex-end;/* se alinea a la derecha */
+    margin: 8px;         /* separa el botón del borde y respeta el border-radius */
+    z-index: 1200;       /* por encima de todo el contenido */
   }
 
   /* 2) Mostrar header móvil */
@@ -775,7 +793,7 @@ background: var(--accent);
 @media (max-width: 600px) {
 .popup-content,
   .modal-content {
-
+    position: relative;;
     flex-direction: column;         /* apilado vertical: primero imagen, luego texto */
     align-items: center;
     text-align: center;
@@ -785,7 +803,18 @@ background: var(--accent);
     min-width: 260px;
     max-height: 90vh;
     overflow-y: auto;
+        overflow: visible;
   }
+  /* 2) Desplazamos los cuadros justo por debajo del header */
+  .popup .popup-content,
+  .modal .modal-content {
+    margin-top: 4rem;          /* ajusta este valor a la altura de tu header móvil */
+    max-height: calc(100vh - 4rem - 3rem);
+    /* arriba: header (4rem) + abajo: un pequeño margen (1rem) */
+    overflow-y: auto;          /* que haga scroll interno si es muy largo */
+    box-sizing: border-box;    /* incluir padding en el cálculo del alto */
+  }
+
   .popup-image-container {
     margin-right: 0;                /* ya no hay texto a la derecha */
     margin-bottom: 1rem;            /* separación entre imagen y texto en móvil */
