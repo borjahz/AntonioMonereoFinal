@@ -858,6 +858,99 @@ background: var(--accent);
   gap:           0.5rem  !important;  /* menos espacio entre h2 y p */
 }
 
+/* === Overrides moved from docs/index.html === */
+/* Header buttons as links (desktop) */
+.header .filter-controls .filter-btn,
+.header .nav-controls .btn,
+.header .dropdown .dropdown-toggle {
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0;
+  text-decoration: none;
+  box-shadow: none;
+}
+.header .filter-controls .filter-btn:hover,
+.header .filter-controls .filter-btn:focus,
+.header .nav-controls .btn:hover,
+.header .nav-controls .btn:focus,
+.header .dropdown .dropdown-toggle:hover,
+.header .dropdown .dropdown-toggle:focus {
+  text-decoration: underline;
+  outline: none;
+}
+.header .filter-controls .filter-btn.active {
+  text-decoration: underline;
+  font-weight: 600;
+}
+.header .nav-controls .btn i { color: inherit; }
+
+/* Dropdown menu link style */
+.dropdown-menu a { color: var(--accent); text-decoration: none; background: transparent; }
+.dropdown-menu a:hover, .dropdown-menu a:focus { text-decoration: underline; color: var(--accent); background: transparent; }
+
+/* Mobile header: make home look like link and align left */
+@media (max-width: 600px) {
+  .mobile-header { justify-content: flex-start; gap: .25rem; padding: 0.75rem 1rem; min-height: 3.75rem; }
+  #searchBtnMobile { margin-left: auto; }
+  .mobile-home-btn { background: none; border: none; color: #2563eb; border-radius: 0; padding: 0.25rem 0.5rem; font-size: 1rem; flex: 0 0 auto; margin: 0 .25rem; text-align: left; }
+  .mobile-home-btn:hover, .mobile-home-btn:focus { text-decoration: underline; outline: none; color: #1d4ed8; }
+  .mobile-nav-btn, .mobile-submenu a { background: none; border: none; color: #2563eb; text-decoration: none; }
+  .mobile-nav-btn:hover, .mobile-nav-btn:focus, .mobile-submenu a:hover, .mobile-submenu a:focus { color: #1d4ed8; text-decoration: underline; }
+  .mobile-nav-btn:active, .mobile-submenu a:active { color: #1e40af; }
+}
+
+/* Folder icons default hidden; shown by JS per category */
+.image-gallery .draggable.folder-year { display: none; background: transparent; box-shadow: none; border: none; max-width: 8vw; max-height: 12vh; }
+@media (max-width: 1024px) { .image-gallery .draggable.folder-year { max-width: 12vw; max-height: 16vh } }
+@media (max-width: 600px) { .image-gallery .draggable.folder-year { max-width: 20vw; max-height: 20vh } }
+.folder-year .folder-icon { display:block; width:100%; height:auto }
+.folder-year .folder-caption { text-align:center; margin-top:4px; font-size:.85rem; color:#cfcfcf; pointer-events:none; user-select:none; white-space:nowrap }
+
+/* Folder positions (mobile default) */
+#Folder2025 { left:2%; top:2% }
+#Folder2024 { left:2%; top:10% }
+#Folder2023 { left:2%; top:18% }
+#Folder2021 { left:2%; top:26% }
+#Folder2020 { left:2%; top:34% }
+#PaintFolder2025 { left:2%; top:2% }
+#PaintFolderPrev { left:2%; top:10% }
+#DrawFolder2025 { left:2%; top:2% }
+
+/* Desktop row positions */
+@media (min-width: 1024px){
+  #Folder2025 { left:6%; top:3.5% }
+  #Folder2024 { left:18%; top:3.5% }
+  #Folder2023 { left:30%; top:3.5% }
+  #Folder2021 { left:42%; top:3.5% }
+  #Folder2020 { left:54%; top:3.5% }
+  #PaintFolder2025 { left:6%; top:3.5% }
+  #PaintFolderPrev { left:18%; top:3.5% }
+  #DrawFolder2025 { left:6%; top:3.5% }
+}
+
+/* Footer in flow */
+.footer { position: relative; bottom: auto; width:100%; z-index:5; margin-top:2rem; box-shadow:0 -1px 4px rgba(0,0,0,.08) }
+
+/* Gallery container scroll and offsets */
+.gallery-container { position: relative; height:auto; min-height:150vh; overflow:visible; top:0; bottom:auto }
+@media (min-width: 1024px){ .gallery-container { min-height: 120vh } }
+@media (min-width: 600px) and (max-width:1023px){ .gallery-container { margin-top:4.6rem } }
+@media (min-width: 1024px){ .gallery-container { margin-top:5.0rem } }
+
+/* Image + caption label */
+.art-caption { position:absolute; max-width:40ch; color:#6b7280; font-size:.8rem; line-height:1.25; white-space:pre-wrap; pointer-events:none; user-select:none; text-shadow:0 1px 0 rgba(255,255,255,.6) }
+@media (max-width:600px){ .art-caption { font-size:.75rem; max-width:32ch; display:none } }
+
+/* Mobile drawings smaller */
+@media (max-width:600px){ .image-gallery .draggable[data-category="dibujos"]:not(.folder-year){ max-width:30vw !important; max-height:22vh !important } }
+
+/* Desktop extra padding under header for gallery */
+@media (min-width:1024px){ .image-gallery { padding-top:6rem } }
+@media (min-width:600px) and (max-width:1023px){ .image-gallery { padding-top:5.5rem } }
+/* === End overrides === */
+
 /* 2) Asegúrate de que el título no traiga un margin excesivo */
 #aboutSection h2 {
   margin: 0 0 0.3rem;   /* solo un pequeño margen inferior */

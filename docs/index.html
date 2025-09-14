@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="font-sans font-light">
 <head>
   <meta charset="utf-8" />
@@ -6,7 +6,7 @@
      <title>Antonio Monereo - Pintor y Dibujante (Copias, Pinturas, Dibujos)</title>
    <meta
      name="description"
-     content="Explora la galería de Antonio Monereo: copias al óleo, pinturas originales y dibujos. Encuentra detalles de cada obra, técnica y año de creación."
+     content="Explora la galerÃ­a de Antonio Monereo: copias al Ã³leo, pinturas originales y dibujos. Encuentra detalles de cada obra, tÃ©cnica y aÃ±o de creaciÃ³n."
    />
   <!-- TailwindCSS & FontAwesome -->
    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -18,8 +18,8 @@
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
-  <link rel="preload" href="dist/output.css" as="style">
-       <link href="dist/output.css" rel="stylesheet" />
+  <link rel="preload" href="dist/output.css?v=dev" as="style">
+       <link href="dist/output.css?v=dev" rel="stylesheet" />
        <link rel="icon" href="dist/images/favicon.ico" />
       
   <!-- Overrides: botones con estilo de enlace (sin recuadro) en header/filtros -->
@@ -51,6 +51,370 @@
     }
     /* Asegura que los iconos hereden el color de enlace */
     .header .nav-controls .btn i { color: inherit; }
+
+    /* Ocultar iconos: luna (dark) y doble flecha (reset) */
+    #darkModeToggle,
+    #resetBtn {
+      display: none !important;
+    }
+
+    /* Ocultar la entrada "Antonio Monereo" del botÃ³n mÃ³vil extra */
+    #mobile-brand { display: none !important; }
+
+    /* Unificar estilo de "Publicaciones" y sus enlaces al estilo enlace */
+    .header .dropdown .dropdown-toggle { color: var(--accent) !important; }
+    .dropdown-menu a {
+      color: var(--accent);
+      text-decoration: none;
+      background: transparent;
+    }
+    .dropdown-menu a:hover,
+    .dropdown-menu a:focus {
+      text-decoration: underline;
+      background: transparent;
+      color: var(--accent);
+    }
+    /* TambiÃ©n en el submenÃº mÃ³vil */
+    .mobile-submenu a {
+      color: var(--accent);
+    }
+    .mobile-submenu a:hover,
+    .mobile-submenu a:focus {
+      text-decoration: underline;
+      background: transparent;
+      color: var(--accent);
+    }
+
+    /* GalerÃ­a: usar proporciones reales de cada imagen */
+    .image-gallery .draggable {
+      width: auto !important;
+      height: auto !important;
+      aspect-ratio: auto !important;
+      object-fit: contain !important;
+      border-radius: 0 !important; /* esquinas rectas */
+      /* AÃºn mÃ¡s pequeÃ±as */
+      max-width: 14vw;
+      max-height: 22vh;
+    }
+    @media (max-width: 1024px) {
+      .image-gallery .draggable { max-width: 22vw; max-height: 26vh; }
+    }
+    @media (max-width: 600px) {
+      .image-gallery .draggable { max-width: 44vw; max-height: 30vh; }
+    }
+
+    /* Ocultar textos de Detalles de la Obra en el popup */
+    .obra-detalles { display: none !important; }
+
+    /* PosiciÃ³n inicial de la carpeta 2025 */
+    #Folder2025 { left: 20%; top: 22%; }
+
+    /* Etiqueta bajo la carpeta: "2025" en gris claro */
+    .image-gallery .draggable.folder-2025{
+      position: absolute; /* ya estÃ¡, pero lo dejamos explÃ­cito */
+      background: transparent !important;
+      box-shadow: none !important;     /* sin sombra/recuadro */
+      border: none !important;         /* sin borde */
+      /* mÃ¡s pequeÃ±o que el resto */
+      max-width: 10vw;
+      max-height: 14vh;
+    }
+    .image-gallery .draggable.folder-2025:focus {
+      outline: none !important;        /* sin contorno al enfocar */
+    }
+    .image-gallery .draggable.folder-2025::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 4px);
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      color: #cfcfcf; /* gris clarito */
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    @media (max-width: 1024px) {
+      .image-gallery .draggable.folder-2025 { max-width: 16vw; max-height: 18vh; }
+    }
+    @media (max-width: 600px) {
+      .image-gallery .draggable.folder-2025 { max-width: 28vw; max-height: 24vh; }
+    }
+  </style>  <style>
+    /* Anula efecto de carga en la carpeta */
+    .folder-2025.image-loading { background: transparent !important; filter: none !important; opacity: 1 !important; }
+    .folder-2025.image-loading::after { content: none !important; display: none !important; }
+  </style>
+  <style>
+    /* Móvil: hacer los dibujos (categoría "dibujos") más pequeños */
+    @media (max-width: 600px) {
+      .image-gallery .draggable[data-category="dibujos"]:not(.folder-year) {
+        max-width: 30vw !important;
+        max-height: 22vh !important;
+      }
+      /* En móvil, por defecto no mostrar etiquetas persistentes; se verán al tocar */
+      .art-caption { display: none; }
+    }
+  </style>
+  <style>
+    /* Forzar margen bajo el header en tablet/desktop para que nada se meta debajo */
+    @media (min-width: 600px) and (max-width: 1023px) {
+      .gallery-container { margin-top: 4.6rem !important; }
+    }
+    @media (min-width: 1024px) {
+      .gallery-container { margin-top: 5.0rem !important; }
+    }
+  </style>
+  <style>
+    /* Overrides específicos para la carpeta 2025: tamaño menor y etiqueta visible */
+    .image-gallery .draggable.folder-2025 {
+      max-width: 8vw;   /* más pequeña */
+      max-height: 12vh;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    .folder-2025 .folder-icon { display: block; width: 100%; height: auto; }
+    .folder-2025 .folder-caption {
+      text-align: center;
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: #cfcfcf; /* gris clarito */
+      pointer-events: none;
+      user-select: none;
+    }
+    @media (max-width: 1024px) {
+      .image-gallery .draggable.folder-2025 { max-width: 12vw; max-height: 16vh; }
+    }
+    @media (max-width: 600px) {
+      .image-gallery .draggable.folder-2025 { max-width: 20vw; max-height: 20vh; }
+    }
+  </style>
+  <style>
+    /* Evitar desenfoque de carga en carpetas */
+    .folder-year.image-loading,
+    .folder-2025.image-loading {
+      filter: none !important;
+      opacity: 1 !important;
+    }
+    .folder-year.image-loading::after,
+    .folder-2025.image-loading::after {
+      content: none !important;
+      display: none !important;
+    }
+  </style>
+  <style>
+    /* Etiquetas informativas alrededor de cada obra */
+    .art-caption {
+      position: absolute;
+      max-width: 40ch;
+      color: #6b7280;            /* gris medio */
+      font-size: .8rem;
+      line-height: 1.25;
+      white-space: pre-wrap;     /* respetar saltos de línea/párrafo */
+      pointer-events: none;      /* no intercepta el drag */
+      user-select: none;
+      text-shadow: 0 1px 0 rgba(255,255,255,.6); /* legibilidad sobre fondos claros */
+    }
+    .art-caption b { color: #6b7280; font-weight: 600; }
+    @media (max-width: 600px) {
+      .art-caption { font-size: .75rem; max-width: 32ch; }
+    }
+  </style>
+  <style>
+    /* Mobile header: "Antonio Monereo" como enlace a la izquierda */
+    @media (max-width: 600px) {
+      .mobile-header { justify-content: flex-start; gap: .25rem; padding: 0.75rem 1rem; min-height: 3.75rem; }
+      #searchBtnMobile { margin-left: auto; }
+      .mobile-home-btn {
+        background: none !important;
+        border: none !important;
+        color: #2563eb !important; /* azul más oscuro como en escritorio */
+        border-radius: 0 !important;
+        padding: 0.25rem 0.5rem;
+        font-size: 1rem;
+        flex: 0 0 auto;      /* deja de ocupar el centro */
+        margin: 0 .25rem;
+        text-align: left;
+      }
+      .mobile-home-btn:hover,
+      .mobile-home-btn:focus { text-decoration: underline; outline: none; color: #1d4ed8 !important; }
+
+      /* Enlaces del menú móvil como en escritorio (azul + darken al hover/active) */
+      .mobile-nav-btn,
+      .mobile-submenu a {
+        background: none !important;
+        border: none !important;
+        color: #2563eb !important;
+        text-decoration: none;
+      }
+      .mobile-nav-btn:hover,
+      .mobile-nav-btn:focus,
+      .mobile-submenu a:hover,
+      .mobile-submenu a:focus { color: #1d4ed8 !important; text-decoration: underline; outline: none; }
+      .mobile-nav-btn:active,
+      .mobile-submenu a:active { color: #1e40af !important; }
+
+      /* Quitar highlight de fondo heredado en hover */
+      .mobile-nav-btn:hover { background: none !important; }
+      /* Dar más aire bajo el header en móvil para que no se solape el contenido */
+      .gallery-container { margin-top: 3.9rem !important; }
+    }
+  </style>
+  <style>
+    /* Desktop fix: aseguramos hueco bajo el header y que las carpetas no queden cortadas */
+    @media (min-width: 1024px) {
+      .image-gallery { padding-top: 8rem !important; }
+      /* Fija la fila de carpetas suficientemente baja para que no se corten */
+      #Folder2025, #Folder2024, #Folder2023, #Folder2021, #Folder2020,
+      #PaintFolder2025, #PaintFolderPrev,
+      #DrawFolder2025 { top: 8rem !important; }
+      /* Evitar recortes: las carpetas no deben heredar aspect-ratio ni alturas máximas */
+      .image-gallery .draggable.folder-year {
+        aspect-ratio: auto !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .folder-year .folder-icon { display:block; width:auto; height:auto; max-height:none; vertical-align: top; }
+    }
+    /* Asegurar que nada se recorta dentro de la pared */
+    .gallery-container { overflow: visible !important; }
+    /* Asegurar que las carpetas queden por encima de cualquier fondo */
+    .image-gallery .draggable { z-index: 2; }
+    .image-gallery .draggable.folder-year { z-index: 3; }
+  </style>
+  <style>
+    /* Estado por defecto: ocultar carpetas; un controlador JS las mostrará por categoría */
+    .image-gallery .draggable.folder-year { display: none; }
+  </style>
+  <style>
+    /* Visibilidad de carpetas declarativa por clase en <body> (fallback robusto) */
+    body.cat-copias   .image-gallery .draggable.folder-year[data-category="copias"]   { display: block; }
+    body.cat-pinturas .image-gallery .draggable.folder-year[data-category="pinturas"] { display: block; }
+    body.cat-dibujos  .image-gallery .draggable.folder-year[data-category="dibujos"]  { display: block; }
+  </style>
+  
+  <style>
+    /* Hacer la galería scrollable y dar altura extra para distribuir obras */
+    .gallery-container { 
+      position: relative !important;
+      height: auto !important;
+      min-height: 150vh;            /* altura extra por defecto */
+      overflow: visible !important; /* permitir que crezca y se haga scroll */
+      top: 0 !important;            /* sin separación forzada bajo el header */
+      bottom: auto !important;
+    }
+    @media (min-width: 1024px) {
+      .gallery-container { min-height: 120vh; }
+    }
+    .image-gallery { 
+      position: relative !important; 
+      min-height: inherit; 
+      padding-top: 0;              /* móvil: sin margen extra */
+    }
+    /* Tablet: deja margen bajo el header fijo */
+    @media (min-width: 600px) and (max-width: 1023px) {
+      .image-gallery { padding-top: 5.5rem; }
+    }
+    /* Escritorio: un poco más de margen bajo el header */
+    @media (min-width: 1024px) {
+      .image-gallery { padding-top: 6rem; }
+    }
+
+    /* Footer debe desplazarse con el scroll (no fijo) */
+    .footer {
+      position: relative !important;
+      bottom: auto !important;
+      width: 100%;
+      z-index: 5;
+      margin-top: 2rem;
+      box-shadow: 0 -1px 4px rgba(0,0,0,0.08);
+    }
+  </style>
+  <style>
+    /* Carpetas Copias: subir un poco más hacia el header en móvil/tablet */
+    #Folder2025 { left: 2%; top: 2%; }
+    #Folder2024 { left: 2%; top: 10%; }
+    #Folder2023 { left: 2%; top: 18%; }
+    #Folder2021 { left: 2%; top: 26%; }
+    #Folder2020 { left: 2%; top: 34%; }
+
+    /* Pinturas: 2025 arriba, Anteriores debajo */
+    #PaintFolder2025  { left: 2%; top: 2%; }
+    #PaintFolderPrev  { left: 2%; top: 10%; }
+
+    /* Dibujos: 2025 arriba */
+    #DrawFolder2025 { left: 2%; top: 2%; }
+
+    /* Ajuste específico para móvil: todavía más cerca del header */
+    @media (max-width: 600px) {
+      #Folder2025 { top: 1.5%; }
+      #Folder2024 { top: 9.5%; }
+      #Folder2023 { top: 17.5%; }
+      #Folder2021 { top: 25.5%; }
+      #Folder2020 { top: 33.5%; }
+
+      #PaintFolder2025 { top: 1.5%; }
+      #PaintFolderPrev { top: 9.5%; }
+
+      #DrawFolder2025 { top: 1.5%; }
+    }
+
+    /* Disposición de carpetas en escritorio: horizontal (fila) */
+    @media (min-width: 1024px) {
+      /* Copias en fila */
+      #Folder2025 { left: 6%;  top: 3.5%; }
+      #Folder2024 { left: 18%; top: 3.5%; }
+      #Folder2023 { left: 30%; top: 3.5%; }
+      #Folder2021 { left: 42%; top: 3.5%; }
+      #Folder2020 { left: 54%; top: 3.5%; }
+
+      /* Pinturas en fila */
+      #PaintFolder2025 { left: 6%;  top: 3.5%; }
+      #PaintFolderPrev { left: 18%; top: 3.5%; }
+
+      /* Dibujos (arriba a la izquierda) */
+      #DrawFolder2025 { left: 6%; top: 3.5%; }
+    }
+
+        .image-gallery .draggable.folder-year {
+      display: block; /* visible por defecto; el JS las ocultará o mostrará según categoría */
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      max-width: 8vw;
+      max-height: 12vh;
+    }
+    .folder-year .folder-icon { display: block; width: 100%; height: auto; }
+    .folder-year .folder-caption {
+      text-align: center;
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: #cfcfcf; /* gris clarito */
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+    }
+    @media (max-width: 1024px) {
+          .image-gallery .draggable.folder-year {
+      display: block; /* visible por defecto; el JS las ocultará o mostrará según categoría */
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      max-width: 8vw;
+      max-height: 12vh;
+    }
+    }
+    @media (max-width: 600px) {
+          .image-gallery .draggable.folder-year {
+      display: block; /* visible por defecto; el JS las ocultará o mostrará según categoría */
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      max-width: 8vw;
+      max-height: 12vh;
+    }
+    }
   </style>
       
 </head>
@@ -60,10 +424,10 @@
 <div id="cookieModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle">
   <div class="modal-content">
     <button id="cookieCloseBtn" class="mac-close-btn" aria-label="Cerrar"></button>
-    <h2 id="cookieModalTitle" class="text-2xl font-semibold mb-4">Política de Cookies</h2>
+    <h2 id="cookieModalTitle" class="text-2xl font-semibold mb-4">PolÃ­tica de Cookies</h2>
     <p class="mb-6">
       Utilizamos cookies propias y de terceros para mejorar tu experiencia y medir el uso de la web.
-      ¿Aceptas el uso de cookies analíticas?
+      Â¿Aceptas el uso de cookies analÃ­ticas?
     </p>
     <div class="flex justify-center space-x-4">
       <button id="acceptCookies" class="btn">Aceptar</button>
@@ -76,12 +440,12 @@
 <div id="modalPrivacy" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
   <div class="modal-content">
     <button data-close class="mac-close-btn mb-4" aria-label="Cerrar"></button>
-    <h2 id="privacyTitle" class="text-2xl font-semibold mb-4">Política de Privacidad</h2>
+    <h2 id="privacyTitle" class="text-2xl font-semibold mb-4">PolÃ­tica de Privacidad</h2>
     <!-- --- CONTENIDO PRIVACIDAD --- -->
     <p><strong>Responsable:</strong> Tu Empresa, CIF, Domicilio.</p>
-    <p><strong>Finalidad:</strong> Gestión de datos y analíticas.</p>
-    <p><strong>Legitimación:</strong> Consentimiento del usuario.</p>
-    <p><strong>Derechos:</strong> Acceso, rectificación, supresión, oposición…</p>
+    <p><strong>Finalidad:</strong> GestiÃ³n de datos y analÃ­ticas.</p>
+    <p><strong>LegitimaciÃ³n:</strong> Consentimiento del usuario.</p>
+    <p><strong>Derechos:</strong> Acceso, rectificaciÃ³n, supresiÃ³n, oposiciÃ³nâ€¦</p>
   </div>
 </div>
 
@@ -89,85 +453,59 @@
 <div id="modalCookies" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cookiesTitle">
   <div class="modal-content">
     <button data-close class="mac-close-btn mb-4" aria-label="Cerrar"></button>
-    <h2 id="cookiesTitle" class="text-2xl font-semibold mb-4">Política de Cookies</h2>
+    <h2 id="cookiesTitle" class="text-2xl font-semibold mb-4">PolÃ­tica de Cookies</h2>
     <!-- --- CONTENIDO COOKIES --- -->
     <p>Usamos cookies para mejorar tu experiencia:</p>
     <ul class="list-disc list-inside mb-4">
       <li><strong>Necesarias:</strong> Imprescindibles para la web.</li>
-      <li><strong>Analíticas:</strong> Medición de visitas (Google Analytics).</li>
+      <li><strong>AnalÃ­ticas:</strong> MediciÃ³n de visitas (Google Analytics).</li>
     </ul>
     <p>Puedes aceptar o rechazar estas cookies desde nuestro banner inicial.</p>
   </div>
 </div>
 
-<!-- Modal Términos -->
+<!-- Modal TÃ©rminos -->
 <div id="modalTerms" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
   <div class="modal-content">
     <button data-close class="mac-close-btn mb-4" aria-label="Cerrar"></button>
-    <h2 id="termsTitle" class="text-2xl font-semibold mb-4">Términos y Condiciones</h2>
-    <!-- --- CONTENIDO TÉRMINOS --- -->
-    <p>Objeto y ámbito de aplicación de estos términos.</p>
+    <h2 id="termsTitle" class="text-2xl font-semibold mb-4">TÃ©rminos y Condiciones</h2>
+    <!-- --- CONTENIDO TÃ‰RMINOS --- -->
+    <p>Objeto y Ã¡mbito de aplicaciÃ³n de estos tÃ©rminos.</p>
     <p>Propiedad intelectual del contenido del sitio.</p>
-    <p>Limitación de responsabilidad.</p>
-    <p>Ley aplicable y jurisdicción.</p>
+    <p>LimitaciÃ³n de responsabilidad.</p>
+    <p>Ley aplicable y jurisdicciÃ³n.</p>
   </div>
 </div>
 
-<footer class="footer" role="contentinfo">
-  <div class="text-center py-6">
-    &copy; <span id="currentYear"></span> Antonio Monereo
-    <nav class="inline ml-4 space-x-3 text-sm">
-      <a href="#" data-modal="modalPrivacy" class="legal-link">Privacidad</a>
-      <a href="#" data-modal="modalCookies" class="legal-link">Cookies</a>
-      <a href="#" data-modal="modalTerms" class="legal-link">Términos</a>
-    </nav>
-  </div>
-</footer>
 
-  <!-- Splash Screen -->
-  <div id="splash" class="splash">
-  <video
-  id="splashVideo"
-  class="splash-img"
-  autoplay
-  muted
-  playsinline
-  webkit-playsinline
-  preload="auto"
->
-  <source src="dist/video/firma-noaudio.mp4" type="video/mp4">
-  <source src="dist/video/firma.webm"        type="video/webm">
-</video>
-
-  </div>
-  <!-- CONTENIDO PRINCIPAL (oculto hasta el fade-in) -->
-  <div id="mainContent" class="main-content">
-  <!-- HEADER MÓVIL -->
+  <!-- CONTENIDO PRINCIPAL -->
+  <div id="mainContent" class="main-content visible">
+  <!-- HEADER MÃ“VIL -->
 <header class="mobile-header">
   <!-- 1) Icono hamburguesa -->
   <button
   id="hamburgerBtn"
   class="mobile-icon-btn"
-  aria-label="Abrir menú"
+  aria-label="Abrir menÃº"
   aria-controls="mobileNav"
   aria-expanded="false"
 >
     <i class="fa-solid fa-bars" aria-hidden="true"></i>
   </button>
 
-  <!-- 2) Botón Home -->
+  <!-- 2) BotÃ³n Home -->
   <button id="homeBtn" class="mobile-home-btn">Antonio Monereo</button>
-   <!-- 3) Botón Buscar (lupa) -->
+   <!-- 3) BotÃ³n Buscar (lupa) -->
  <button id="searchBtnMobile" class="mobile-icon-btn" aria-label="Buscar">
   <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
 </button>
 </header>
-<!-- Menú lateral móvil -->
+<!-- MenÃº lateral mÃ³vil -->
 <nav
   id="mobileNav"
   class="mobile-nav"
   role="navigation"
-  aria-label="Navegación móvil"
+  aria-label="NavegaciÃ³n mÃ³vil"
   hidden
 >
   <ul role="menu">
@@ -197,13 +535,13 @@
 
   <!-- Header -->
   <header class="header">
-    <nav class="filter-controls" aria-label="Filtros de categoría">
+    <nav class="filter-controls" aria-label="Filtros de categorÃ­a">
       <button class="filter-btn active" data-cat="all">Antonio Monereo</button>
       <button class="filter-btn" data-cat="copias" data-i18n="filterCopies">Copias</button>
       <button class="filter-btn" data-cat="pinturas" data-i18n="filterPaintings">Pinturas</button>
       <button class="filter-btn" data-cat="dibujos" data-i18n="filterDrawings">Dibujos</button>
     </nav>
-    <nav class="nav-controls" aria-label="Navegación principal">
+    <nav class="nav-controls" aria-label="NavegaciÃ³n principal">
       <button id="langToggle" class="lang-toggle">ESP/EN</button>
       <button id="aboutBtn" class="btn"
                aria-controls="aboutSection" data-modal="aboutSection" aria-expanded="false" data-i18n="about">
@@ -213,7 +551,7 @@
          aria-controls="contactSection" data-modal="contactSection" aria-expanded="false" data-i18n="contact">
    Contacto
  </button>
-  <!-- Botón de Publicaciones con menú desplegable -->
+  <!-- BotÃ³n de Publicaciones con menÃº desplegable -->
  <div class="dropdown">
    <button id="pubBtn" class="btn dropdown-toggle" data-i18n="pubBtn">Publicaciones</button>
    <ul id="pubMenu" class="dropdown-menu">
@@ -247,7 +585,7 @@
          aria-modal="true" inert>
     <div class="sheet-handle" aria-hidden="true"></div>
     <div class="sheet-content">
-      <div class="sheet-group" aria-label="Categorías de obra">
+      <div class="sheet-group" aria-label="CategorÃ­as de obra">
         <button class="sheet-filter" data-cat="all">Todo</button>
         <button class="sheet-filter" data-cat="copias">Copias</button>
         <button class="sheet-filter" data-cat="pinturas">Pinturas</button>
@@ -264,8 +602,46 @@
 
   <!-- Gallery -->
   <main class="gallery-container">
-    <section class="image-gallery" aria-label="Galería interactiva">
-  <!-- Velázquez -->
+    <section class="image-gallery" aria-label="GalerÃ­a interactiva">
+  <!-- Carpeta 2025 (Copias) usando el .ico proporcionado -->
+  <div id="Folder2025" class="draggable folder-year folder-2025" data-category="copias" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta 2025" />
+    <div class="folder-caption">2025</div>
+  </div>
+  <!-- Carpetas adicionales: 2020, 2021, 2023, 2024 (solo Copias) -->
+  <div id="Folder2020" class="draggable folder-year" data-category="copias" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta 2020" />
+    <div class="folder-caption">2020</div>
+  </div>
+  <div id="Folder2021" class="draggable folder-year" data-category="copias" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta 2021" />
+    <div class="folder-caption">2021</div>
+  </div>
+  <div id="Folder2023" class="draggable folder-year" data-category="copias" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta 2023" />
+    <div class="folder-caption">2023</div>
+  </div>
+  <div id="Folder2024" class="draggable folder-year" data-category="copias" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta 2024" />
+    <div class="folder-caption">2024</div>
+  </div>
+
+  <!-- Carpetas para Pinturas: 2025 y Anteriores (solo Pinturas) -->
+  <div id="PaintFolder2025" class="draggable folder-year folder-pinturas" data-category="pinturas" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta Pinturas 2025" />
+    <div class="folder-caption">2025</div>
+  </div>
+  <div id="PaintFolderPrev" class="draggable folder-year folder-pinturas" data-category="pinturas" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta Pinturas Anteriores" />
+    <div class="folder-caption">Anteriores</div>
+  </div>
+
+  <!-- Carpeta para Dibujos: 2025 (solo Dibujos) -->
+  <div id="DrawFolder2025" class="draggable folder-year folder-dibujos" data-category="dibujos" tabindex="0">
+    <img class="folder-icon" src="dist/images/aqua-icons/Aqua  Folder.ico" alt="Carpeta Dibujos 2025" />
+    <div class="folder-caption">2025</div>
+  </div>
+  <!-- VelÃ¡zquez -->
   <picture>
     <source srcset="dist/images/Velazquez.webp" type="image/webp">
     <img
@@ -279,8 +655,8 @@
       fetchpriority="low"
       data-popup-src="dist/images/Velazquez_Real.webp"
        alt="Ferdinando Brandani (2019)"
-      data-description="Copia a partir de original de Diego Velázquez<br>Óleo sobre lienzo<br>Colección del artista"
-      data-detail-story="Esta es la primera copia que pinté en el Museo del Prado y quizás por eso le tengo especial cariño. Yo empecé a copiar para copiar a Velázquez pero al ser uno de los principales atractivos del Prado, siempre hay mucha gente en sus salas. Para una primera copia esto me imponía mucho así que busqué una obra menos conocida pero que fuera un buen ejemplo de la técnica del Velázquez maduro. Pintado el mismo año que el Inocencio X para mi este es uno de los mejores retratos de Velázquez y fue una masterclass que nunca olvidaré."
+      data-description="Copia a partir de original de Diego VelÃ¡zquez<br>Ã“leo sobre lienzo<br>ColecciÃ³n del artista"
+      data-detail-story="Esta es la primera copia que pintÃ© en el Museo del Prado y quizÃ¡s por eso le tengo especial cariÃ±o. Yo empecÃ© a copiar para copiar a VelÃ¡zquez pero al ser uno de los principales atractivos del Prado, siempre hay mucha gente en sus salas. Para una primera copia esto me imponÃ­a mucho asÃ­ que busquÃ© una obra menos conocida pero que fuera un buen ejemplo de la tÃ©cnica del VelÃ¡zquez maduro. Pintado el mismo aÃ±o que el Inocencio X para mi este es uno de los mejores retratos de VelÃ¡zquez y fue una masterclass que nunca olvidarÃ©."
     />
   </picture>
 
@@ -298,8 +674,8 @@
       fetchpriority="low"
       data-popup-src="dist/images/Nieve_Real.webp"
      alt="Madrid nevado (2022)"
-      data-description="Calle Castellana durante la Filomena<br>Óleo sobre lienzo<br>Colección del artista"
-      data-detail-story="Representé la Castellana durante Filomena utilizando una paleta de blancos, grises y azules fríos para capturar la atmósfera helada. Trabajé con capas finas de óleo para reflejar la textura suave de la nieve. Me interesaba mostrar cómo la nevada transformó por completo el paisaje urbano habitual."
+      data-description="Calle Castellana durante la Filomena<br>Ã“leo sobre lienzo<br>ColecciÃ³n del artista"
+      data-detail-story="RepresentÃ© la Castellana durante Filomena utilizando una paleta de blancos, grises y azules frÃ­os para capturar la atmÃ³sfera helada. TrabajÃ© con capas finas de Ã³leo para reflejar la textura suave de la nieve. Me interesaba mostrar cÃ³mo la nevada transformÃ³ por completo el paisaje urbano habitual."
       tabindex="0"
     />
   </picture>
@@ -318,8 +694,8 @@
       fetchpriority="low"
       data-popup-src="dist/images/Pablo_Real.webp"
        alt="Pablo (2024)"
-      data-description= "Óleo sobre lienzo<br>Colección del artista"
-      data-detail-story="En este retrato me interesaba capturar la forma en que Pablo se mueve: su cuerpo alargado, flexible, siempre en tensión suave. Trabajé la anatomía con atención, buscando un equilibrio entre precisión y soltura en el trazo. La postura refleja su energía contenida, casi como si estuviera a punto de moverse fuera del lienzo."
+      data-description= "Ã“leo sobre lienzo<br>ColecciÃ³n del artista"
+      data-detail-story="En este retrato me interesaba capturar la forma en que Pablo se mueve: su cuerpo alargado, flexible, siempre en tensiÃ³n suave. TrabajÃ© la anatomÃ­a con atenciÃ³n, buscando un equilibrio entre precisiÃ³n y soltura en el trazo. La postura refleja su energÃ­a contenida, casi como si estuviera a punto de moverse fuera del lienzo."
       tabindex="0"
     />
   </picture>
@@ -338,9 +714,9 @@
       fetchpriority="low"
       data-popup-src="dist/images/Ester_Real.webp"
       alt="Ester (2023)"
-      data-description="Óleo sobre lienzo<br>Colección del artista"
-      data-detail-story="Esta es una de las obras con la que más he conectado. La pinté poco después de terminar la copia de Zurbarán. En aquel momento mi concepción de la pintura y la forma estaba muy próxima a Zurbarán, Balthus, el Picasso clasicista, la pintura metafísica…
-Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi hermana estudiando. Durante mucho tiempo ha sido mi pintura favorita."
+      data-description="Ã“leo sobre lienzo<br>ColecciÃ³n del artista"
+      data-detail-story="Esta es una de las obras con la que mÃ¡s he conectado. La pintÃ© poco despuÃ©s de terminar la copia de ZurbarÃ¡n. En aquel momento mi concepciÃ³n de la pintura y la forma estaba muy prÃ³xima a ZurbarÃ¡n, Balthus, el Picasso clasicista, la pintura metafÃ­sicaâ€¦
+Yo querÃ­a pintar una imagen llena de equilibrio y encontrÃ© el motivo en mi hermana estudiando. Durante mucho tiempo ha sido mi pintura favorita."
       tabindex="0"
     />
   </picture>
@@ -358,9 +734,9 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
       decoding="async"
       fetchpriority="low"
       alt="Josefa de Jovellanos (2022)"
-      data-description="Copia a partir de original de Joaquín Inza<br>Óleo sobre lienzo<br>Ayuntamiento de Gijón" 
+      data-description="Copia a partir de original de JoaquÃ­n Inza<br>Ã“leo sobre lienzo<br>Ayuntamiento de GijÃ³n" 
       data-popup-src="dist/images/Gijon_real.JPG.webp"
-      data-detail-story="Josefa de Jovellanos fue una escritora gijonesa clave en las letras asturianas y en el desarrollo de la lengua asturiana. Con la intención de tenerla en el ayuntamiento representada junto a otras figuras locales ilustres (como su hermano Gaspar Melchor de Jovellanos) el Ayuntamiento de Gijón me encargó una copia del retrato que conservan las madres agustinas recoletas en el convento de Agustinas Recoletas de Gijón. Desde entonces se puede ver en la sala de plenos del ayuntamiento."
+      data-detail-story="Josefa de Jovellanos fue una escritora gijonesa clave en las letras asturianas y en el desarrollo de la lengua asturiana. Con la intenciÃ³n de tenerla en el ayuntamiento representada junto a otras figuras locales ilustres (como su hermano Gaspar Melchor de Jovellanos) el Ayuntamiento de GijÃ³n me encargÃ³ una copia del retrato que conservan las madres agustinas recoletas en el convento de Agustinas Recoletas de GijÃ³n. Desde entonces se puede ver en la sala de plenos del ayuntamiento."
       tabindex="0"
     />
   </picture>
@@ -379,8 +755,8 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
       fetchpriority="low"
       data-popup-src="dist/images/Ascen_Real.webp"
      alt="Ascen (2024)"
-      data-description="Óleo sobre lienzo<br>Colección del artista"
-      data-detail-story="Quise retratar a Ascen en un momento de intimidad tranquila, tumbada en el sofá con una bata blanca que apenas roza su piel. Me interesaba transmitir su delicadeza natural y un erotismo sutil, sin forzarlo. La composición juega con las curvas del cuerpo y la caída suave de la tela, buscando una sensación de calma y sensualidad al mismo tiempo."
+      data-description="Ã“leo sobre lienzo<br>ColecciÃ³n del artista"
+      data-detail-story="Quise retratar a Ascen en un momento de intimidad tranquila, tumbada en el sofÃ¡ con una bata blanca que apenas roza su piel. Me interesaba transmitir su delicadeza natural y un erotismo sutil, sin forzarlo. La composiciÃ³n juega con las curvas del cuerpo y la caÃ­da suave de la tela, buscando una sensaciÃ³n de calma y sensualidad al mismo tiempo."
       tabindex="0"
     />
  </picture>
@@ -399,20 +775,20 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
       fetchpriority="low"
       data-popup-src="dist/images/Autorretrato_Real.webp"
       alt="Autorretrato (2023)"
-      data-description="Óleo sobre lienzo<br>Colección del artista"
-      data-detail-story="Este autorretrato lo pinté como un ejercicio de observación y sinceridad. No busqué idealizarme, sino entender cómo me veo y cómo me siento en ese momento. Trabajé con una luz neutra y pinceladas directas, dejando que la expresión surgiera casi sin forzarla."
+      data-description="Ã“leo sobre lienzo<br>ColecciÃ³n del artista"
+      data-detail-story="Este autorretrato lo pintÃ© como un ejercicio de observaciÃ³n y sinceridad. No busquÃ© idealizarme, sino entender cÃ³mo me veo y cÃ³mo me siento en ese momento. TrabajÃ© con una luz neutra y pinceladas directas, dejando que la expresiÃ³n surgiera casi sin forzarla."
       tabindex="0"
     />
   </picture>
 
 </section>
-  <!-- Busca aquí, al final de main.gallery-container -->
+  <!-- Busca aquÃ­, al final de main.gallery-container -->
 <div id="searchContainer" class="search-container hidden">
   <form id="searchForm" class="search-form">
     <input
       type="text"
       id="searchInput"
-      placeholder="Buscar obras…"
+      placeholder="Buscar obrasâ€¦"
       aria-label="Buscar obras"
     />
     <button type="submit" class="btn btn-nav" aria-label="Buscar">
@@ -431,7 +807,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
       <div class="popup-text">
         <h2 id="popupTitle"></h2>
         <p id="popupDescription"></p>
-         <!-- Comenzamos con contenedores vacíos: -->
+         <!-- Comenzamos con contenedores vacÃ­os: -->
         <div class="obra-detalles">
           <h3>Detalles de la Obra</h3>
           <ul id="detalleLista">
@@ -447,7 +823,7 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
     <div class="modal-content">
       <button id="closeAbout" class="mac-close-btn" data-close aria-label="Cerrar about"></button>
       <h2 id="aboutTitle" data-i18n="aboutTitle">Sobre Antonio Monereo</h2>
-      <p id="aboutInfo" data-i18n="aboutInfo"> Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentró muy pronto en el mundo del arte: comenzó a dibujar desde niño, ganó un primer premio en el certamen "Toledo desde el Alcázar" (2016) y desde 2019 ejerce como uno de los copistas más jóvenes del Museo del Prado. Su acercamiento al arte es profundamente clásico, con una destacada técnica académica, pero también muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.</p>
+      <p id="aboutInfo" data-i18n="aboutInfo"> Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentrÃ³ muy pronto en el mundo del arte: comenzÃ³ a dibujar desde niÃ±o, ganÃ³ un primer premio en el certamen "Toledo desde el AlcÃ¡zar" (2016) y desde 2019 ejerce como uno de los copistas mÃ¡s jÃ³venes del Museo del Prado. Su acercamiento al arte es profundamente clÃ¡sico, con una destacada tÃ©cnica acadÃ©mica, pero tambiÃ©n muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.</p>
     </div>
   </div>
 <!-- Contact modal -->
@@ -456,13 +832,13 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
   <div class="modal-content">
     <button id="closeContact" class="mac-close-btn" data-close 
             aria-label="Cerrar contacto"></button>
-    <h2 id="contactTitle" data-i18n="contactTitle">Envíanos un email</h2>
+    <h2 id="contactTitle" data-i18n="contactTitle">EnvÃ­anos un email</h2>
      <button id="sendMailBtn" class="btn">
       <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
       Enviar
     </button>
     <!-- Iconos sociales -->
-    <div class="social-icons" aria-label="Síguenos en redes sociales">
+    <div class="social-icons" aria-label="SÃ­guenos en redes sociales">
       <a href="https://www.instagram.com/a.monereo?igsh=dTZhdmp5ZGJlZzIy" target="_blank" rel="noopener" aria-label="Instagram">
         <i class="fa-brands fa-instagram" aria-hidden="true"></i>
       </a>
@@ -473,10 +849,178 @@ Yo quería pintar una imagen llena de equilibrio y encontré el motivo en mi her
   </div>
 </div>
   </main>
+<!-- Fallback muy ligero: forzar imágenes reales aunque falle el JS compilado -->
 <script>
-  // Rellenar año actual
-  document.getElementById('currentYear').textContent = new Date().getFullYear();
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      document.querySelectorAll('.image-gallery .draggable').forEach(function (img) {
+        var real = img.getAttribute('data-popup-src');
+        if (!real) return;
+        var pic = img.closest('picture');
+        if (pic) {
+          var webp = pic.querySelector('source[type="image/webp"]');
+          if (webp) { webp.setAttribute('srcset', real); }
+        }
+        img.setAttribute('src', real);
+        img.setAttribute('loading', 'eager');
+        img.setAttribute('fetchpriority', 'high');
+      });
+    } catch (e) { /* ignore fallback errors */ }
+  });
+  console.log('[fallback] imágenes reales aplicadas');
+  </script>
+<script src="dist/main.min.js?v=dev" defer></script>
+<script>
+  // Controlador robusto: asegura visibilidad de carpetas solo en su categoría (no en "Antonio Monereo")
+  (function(){
+    function valid(cat){ return cat==='copias' || cat==='pinturas' || cat==='dibujos'; }
+    function activeCat(){ return document.querySelector('.filter-btn.active')?.dataset.cat || null; }
+    function applyFolders(){
+      var cat = activeCat();
+      if (window.__forceNoCat === true) { cat = null; }
+      // Marcar clase en <body> para que el CSS muestre solo la categoría activa
+      document.body.classList.remove('cat-copias','cat-pinturas','cat-dibujos');
+      if (valid(cat)) document.body.classList.add('cat-'+cat);
+      document.querySelectorAll('.folder-year').forEach(function(el){
+        el.style.display = (valid(cat) && el.getAttribute('data-category') === cat) ? 'block' : 'none';
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+      // Ocultar por defecto
+      document.querySelectorAll('.folder-year').forEach(function(el){ el.style.display='none'; });
+      // Aplicar según activo
+      setTimeout(applyFolders, 0);
+      // Móvil: al pulsar el botón "Antonio Monereo" (home) forzar estado "all"
+      var homeBtn = document.getElementById('homeBtn');
+      if (homeBtn) {
+        homeBtn.addEventListener('click', function(){
+          // Quitar clases de categoría y ocultar carpetas
+          document.body.classList.remove('cat-copias','cat-pinturas','cat-dibujos');
+          window.__forceNoCat = true;
+          document.querySelectorAll('.folder-year').forEach(function(el){ el.style.display='none'; });
+          // Reaplicar estado "sin categoría"
+          setTimeout(applyFolders, 0);
+        });
+      }
+    });
+    // Reaplicar tras clics en filtros (desktop/móvil/sheet)
+    document.addEventListener('click', function(e){
+      if (e.target.closest('.filter-btn') || e.target.closest('.mobile-nav-btn[data-filter]') || e.target.closest('.sheet-filter')) {
+        window.__forceNoCat = false;
+        setTimeout(applyFolders, 0);
+      }
+    }, true);
+  })();
 </script>
-<script src="dist/main.min.js" defer></script>
-</body>
+<script>
+// Restauración de UX: carpetas por categoría, auto-abrir 2025, y contenidos por carpeta
+document.addEventListener('DOMContentLoaded', () => {
+  // Oculta todas las carpetas por defecto para evitar que aparezcan en "Antonio Monereo"
+  document.querySelectorAll('.folder-year').forEach(el => { el.style.display = 'none'; });
+  // 1) Usar imágenes reales siempre
+  try {
+    document.querySelectorAll('.image-gallery .draggable').forEach(img => {
+      const real = img.getAttribute('data-popup-src');
+      if (!real) return;
+      const pic = img.closest('picture');
+      if (pic) {
+        const webp = pic.querySelector('source[type="image/webp"]');
+        if (webp) webp.setAttribute('srcset', real);
+      }
+      img.setAttribute('src', real);
+    });
+  } catch(_) {}
+
+  // 2) Evitar popup en carpetas
+  document.querySelectorAll('.folder-year').forEach(f => {
+    f.ondblclick = e => { e.preventDefault(); e.stopPropagation(); };
+    f.addEventListener('click', e => { e.stopPropagation(); });
+  });
+
+  // 3) Mostrar carpetas solo en su categoría
+  const applyFolders = (cat) => {
+    document.querySelectorAll('.folder-year').forEach(el => {
+      el.style.display = (cat && el.getAttribute('data-category') === cat) ? 'block' : 'none';
+    });
+  };
+  const activeBtn = document.querySelector('.filter-btn.active');
+  const initialCat = activeBtn ? activeBtn.dataset.cat : null;
+  // Si la categoría inicial no es copias/pinturas/dibujos, mantenemos ocultas las carpetas
+  applyFolders((initialCat === 'copias' || initialCat === 'pinturas' || initialCat === 'dibujos') ? initialCat : null);
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => applyFolders(btn.dataset.cat)));
+  document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => btn.addEventListener('click', () => applyFolders(btn.getAttribute('data-filter'))));
+  document.querySelectorAll('.sheet-filter').forEach(btn => btn.addEventListener('click', () => applyFolders(btn.dataset.cat)));
+
+  // 4) Auto-abrir 2025 en cada categoría
+  const idMap = { copias:'Folder2025', pinturas:'PaintFolder2025', dibujos:'DrawFolder2025' };
+  const autoOpen = (cat) => { const id=idMap[cat]; const el=id&&document.getElementById(id); el&&setTimeout(()=>el.click(),0); };
+  if (activeBtn) autoOpen(activeBtn.dataset.cat);
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => autoOpen(btn.dataset.cat)));
+  document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => btn.addEventListener('click', () => autoOpen(btn.getAttribute('data-filter'))));
+  document.querySelectorAll('.sheet-filter').forEach(btn => btn.addEventListener('click', () => autoOpen(btn.dataset.cat)));
+
+  // 5) Cambiar icono de carpeta abierta/cerrada por categoría
+  const CLOSED='dist/images/aqua-icons/Aqua  Folder.ico', OPEN='dist/images/aqua-icons/Aqua Favorites.ico';
+  const setOpen = (folder) => {
+    const cat = folder.getAttribute('data-category');
+    document.querySelectorAll('.folder-year').forEach(f => {
+      if (f.getAttribute('data-category') === cat) {
+        f.classList.remove('open');
+        const i=f.querySelector('.folder-icon'); if (i) i.src=CLOSED;
+      }
+    });
+    folder.classList.add('open'); const i=folder.querySelector('.folder-icon'); if (i) i.src=OPEN;
+  };
+  document.querySelectorAll('.folder-year').forEach(f => f.addEventListener('click', () => setOpen(f)));
+
+  // 6) Contenidos por carpeta en Copias
+  const hideIds = (ids) => ids.forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+  const showId  = (id)  => { const el=document.getElementById(id); if(el){ el.style.display='block'; } };
+  // Ocultar inicialmente las obras controladas por carpetas
+  hideIds(['Velazquez','Gijon']);
+  const f2021 = document.getElementById('Folder2021');
+  const f2023 = document.getElementById('Folder2023');
+  if (f2021) f2021.addEventListener('click', () => { showId('Velazquez'); hideIds(['Gijon']); });
+  if (f2023) f2023.addEventListener('click', () => { showId('Gijon'); hideIds(['Velazquez']); });
+  document.querySelectorAll('.folder-year[data-category="copias"]').forEach(f => {
+    if (f && !['Folder2021','Folder2023'].includes(f.id)) f.addEventListener('click', () => hideIds(['Velazquez','Gijon']));
+  });
+
+  // 7) Pinturas: Anteriores muestra todo; 2025 oculta
+  const pfPrev = document.getElementById('PaintFolderPrev');
+  const pf2025 = document.getElementById('PaintFolder2025');
+  const paints = Array.from(document.querySelectorAll('.draggable[data-category="pinturas"]')).filter(el => !el.classList.contains('folder-year'));
+  const hidePaints = () => paints.forEach(el => el.style.display='none');
+  const showPaints = () => paints.forEach(el => el.style.display='block');
+  hidePaints();
+  if (pfPrev)  pfPrev.addEventListener('click',  () => showPaints());
+  if (pf2025) pf2025.addEventListener('click', () => hidePaints());
+});
+</script>
+
+<footer class="footer" role="contentinfo">
+  <div class="text-center py-6">
+    &copy; <span id="currentYear"></span> Antonio Monereo
+    <nav class="inline ml-4 space-x-3 text-sm">
+      <a href="#" data-modal="modalPrivacy" class="legal-link">Privacidad</a>
+      <a href="#" data-modal="modalCookies" class="legal-link">Cookies</a>
+      <a href="#" data-modal="modalTerms" class="legal-link">Términos</a>
+    </nav>
+  </div>
+</footer></body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

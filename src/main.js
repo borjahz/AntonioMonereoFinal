@@ -670,6 +670,169 @@ popupImg.addEventListener('dblclick', () => {
   }
 });
 
+// === UX Enhancements moved from index.html (guarded to avoid double bind) ===
+(function(){
+  if (window._uxEnhanced) return; window._uxEnhanced = true;
+  // 1) No popup for folders
+  const overrideShowPop = () => {
+    const g = window.showPop; if (typeof g !== 'function') return;
+    window.showPop = function(el){
+      try { if (el && (el.classList?.contains('folder-year') || el.closest?.('.folder-year'))) return; } catch(_){ }
+      return g.apply(this, arguments);
+    };
+  };
+
+  // 2) Show folders only in their category + default open 2025
+  const initFolderVisibility = () => {
+    const apply = (cat) => {
+      document.querySelectorAll('.folder-year').forEach(el => {
+        el.style.display = (el.getAttribute('data-category') === cat) ? 'block' : 'none';
+      });
+    };
+    const active = document.querySelector('.filter-btn.active');
+    apply(active ? active.dataset.cat : 'all');
+    const hook = (btn, getCat) => btn.addEventListener('click', () => apply(getCat(btn)));
+    document.querySelectorAll('.filter-btn').forEach(b => hook(b, x=>x.dataset.cat));
+    document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(b => hook(b, x=>x.getAttribute('data-filter')));
+    document.querySelectorAll('.sheet-filter').forEach(b => hook(b, x=>x.dataset.cat));
+  };
+
+  // 3) Auto-open 2025 per category and folder icon toggle
+  const initFolderDefaults = () => {
+    const idMap = { copias:'Folder2025', pinturas:'PaintFolder2025', dibujos:'DrawFolder2025' };
+    const clickDefault = (cat) => { const id=idMap[cat]; const el=id&&document.getElementById(id); el&&setTimeout(()=>el.dispatchEvent(new MouseEvent('click',{bubbles:true})),0); };
+    const active = document.querySelector('.filter-btn.active'); if (active) clickDefault(active.dataset.cat);
+    document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>clickDefault(b.dataset.cat)));
+    document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(b=>b.addEventListener('click',()=>clickDefault(b.getAttribute('data-filter'))));
+    document.querySelectorAll('.sheet-filter').forEach(b=>b.addEventListener('click',()=>clickDefault(b.dataset.cat)));
+
+    const CLOSED='dist/images/aqua-icons/Aqua  Folder.ico', OPEN='dist/images/aqua-icons/Aqua Favorites.ico';
+    const folders=[...document.querySelectorAll('.folder-year')];
+    const setOpen=(f)=>{
+      const cat=f.getAttribute('data-category');
+      folders.forEach(n=>{ if(n.getAttribute('data-category')===cat){ n.classList.remove('open'); const i=n.querySelector('.folder-icon'); if(i) i.src=CLOSED; }});
+      f.classList.add('open'); const i=f.querySelector('.folder-icon'); if(i) i.src=OPEN;
+    };
+    folders.forEach(f=>f.addEventListener('click',e=>{ e.stopPropagation(); setOpen(f);}));
+  };
+
+  // 4) Pinturas: “Anteriores” muestra todo; 2025 oculta
+  const initPinturasPrev = () => {
+    const prev=document.getElementById('PaintFolderPrev'); const y25=document.getElementById('PaintFolder2025');
+    const items=[...document.querySelectorAll('.draggable[data-category="pinturas"]')].filter(el=>!el.classList.contains('folder-year'));
+    if(!prev||!items.length) return;
+    const hide=()=>items.forEach(e=>e.style.display='none'); const show=()=>items.forEach(e=>{e.style.display='block';});
+    hide(); prev.addEventListener('click',e=>{e.stopPropagation(); show();}); if(y25) y25.addEventListener('click',e=>{e.stopPropagation(); hide();});
+  };
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    overrideShowPop();
+    initFolderVisibility();
+    initFolderDefaults();
+    initPinturasPrev();
+  });
+})();
+// === End UX Enhancements ===
+
+// === Layout + Captions (moved from index.html) ===
+(function(){
+  if (window._artLayout) return; window._artLayout = true;
+  const $ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+  function ensureCaption(img){
+    if (img.classList.contains('folder-year')) return null;
+    const container = document.querySelector('.image-gallery');
+    if (!container) return null;
+    let cap = container.querySelector(`.art-caption[data-for="${img.id}"]`);
+    if (!cap){ cap = document.createElement('div'); cap.className = 'art-caption'; cap.setAttribute('data-for', img.id); container.appendChild(cap); }
+    const textFromHTML = (html) => {
+      try { return (html||'').replace(/<br\s*\/?>(\s*)/gi, '\n').replace(/<p\b[^>]*>/gi,'').replace(/<\/p>/gi,'\n\n').replace(/<[^>]*>/g,'').replace(/\n{3,}/g,'\n\n').trim(); } catch { return html||''; }
+    };
+    const title = img.getAttribute('alt') || img.id || '';
+    const desc  = textFromHTML(img.dataset.description || '');
+    const short = desc.length > 220 ? (desc.slice(0,217)+'…') : desc;
+    cap.innerHTML = `<b>${title}</b>${short? '\n'+short:''}`;
+    return cap;
+  }
+
+  function layoutVisibleArtworks(){
+    const gallery = document.querySelector('.gallery-container');
+    const container = document.querySelector('.image-gallery');
+    if(!gallery||!container) return;
+    const crect = gallery.getBoundingClientRect();
+    const visible = $('.image-gallery .draggable').filter(el=>!el.classList.contains('folder-year') && getComputedStyle(el).display!=='none');
+    if(!visible.length) return;
+    const folderBottom = Math.max(0, ...$('.folder-year').filter(f=>getComputedStyle(f).display!=='none').map(f=>f.getBoundingClientRect().bottom - crect.top));
+    const padX = Math.max(12, Math.round(crect.width*0.02));
+    const baseTop = Math.max(12, Math.round(folderBottom+16));
+    const isDesktop = matchMedia('(min-width:1024px)').matches;
+    const isTablet  = matchMedia('(min-width:600px) and (max-width:1023px)').matches;
+    const cols = isDesktop?3:isTablet?2:1;
+    const gapX = isDesktop?64:isTablet?48:32;
+    const gapY = isDesktop?80:isTablet?64:48;
+    const availW = crect.width - padX*2 - gapX*(cols-1);
+    const colW = Math.max(120, Math.floor(availW/cols));
+    const colH = new Array(cols).fill(baseTop);
+    visible.sort((a,b)=>(b.offsetHeight||0)-(a.offsetHeight||0));
+    visible.forEach(el=>{
+      let col=0; for(let i=1;i<cols;i++) if(colH[i]<colH[col]) col=i;
+      el.style.width=''; el.style.height=''; if(el.offsetWidth>colW) el.style.width=colW+'px';
+      const left = padX + col*(colW+gapX); const top = colH[col];
+      el.style.left=left+'px'; el.style.top=top+'px';
+      const cap = ensureCaption(el);
+      const h = el.offsetHeight || Math.round(colW*0.75);
+      if(cap){ cap.style.display='block'; cap.style.left=left+'px'; const capGap=6; const capTop=top+h+capGap; cap.style.top=capTop+'px'; const ch = cap.getBoundingClientRect().height||18; colH[col]=capTop+ch+gapY; }
+      else { colH[col]=top+h+gapY; }
+    });
+    const maxH = Math.max(...colH);
+    container.style.minHeight = Math.max(container.offsetHeight, maxH+40)+'px';
+  }
+
+  function syncAllCaptions(){
+    const container = document.querySelector('.image-gallery'); if(!container) return;
+    $('.image-gallery .draggable').filter(i=>!i.classList.contains('folder-year')).forEach(img=>{
+      const cap = ensureCaption(img); if(!cap) return; cap.style.display = (getComputedStyle(img).display==='none')?'none':'block';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    layoutVisibleArtworks();
+    syncAllCaptions();
+    $('.image-gallery .draggable').forEach(img=>{
+      img.addEventListener('pointermove', ()=>{ layoutVisibleArtworks(); syncAllCaptions(); });
+      img.addEventListener('pointerup',   ()=>{ layoutVisibleArtworks(); syncAllCaptions(); });
+    });
+    const reSync = ()=>{ layoutVisibleArtworks(); syncAllCaptions(); };
+    $('.filter-btn').forEach(b=>b.addEventListener('click', reSync));
+    $('.mobile-nav-btn[data-filter]').forEach(b=>b.addEventListener('click', reSync));
+    $('.sheet-filter').forEach(b=>b.addEventListener('click', reSync));
+    $('.folder-year').forEach(f=>f.addEventListener('click', reSync));
+
+    // Móvil: tap para ver/ocultar etiqueta sin popup
+    const isMobile = ()=> matchMedia('(max-width:600px)').matches;
+    const container = document.querySelector('.image-gallery');
+    if(container){
+      container.addEventListener('click',(e)=>{
+        if(!isMobile()) return; const img=e.target.closest?.('.draggable'); if(!img||img.classList.contains('folder-year')) return; e.stopPropagation(); e.preventDefault();
+        const cap = ensureCaption(img); if(!cap) return; const visible = cap.style.display!=='none'; container.querySelectorAll('.art-caption').forEach(c=>c.style.display='none'); if(!visible){ layoutVisibleArtworks(); syncAllCaptions(); cap.style.display='block'; }
+      }, true);
+      document.addEventListener('click',()=>{ if(!isMobile()) return; container.querySelectorAll('.art-caption').forEach(c=>c.style.display='none'); });
+    }
+  });
+})();
+// === End Layout + Captions ===
+
+// === Misc small inits ===
+document.addEventListener('DOMContentLoaded', ()=>{
+  const y = document.getElementById('currentYear'); if(y) y.textContent = new Date().getFullYear();
+  // Force full-res images
+  document.querySelectorAll('.image-gallery .draggable').forEach(img=>{
+    const real = img.getAttribute('data-popup-src'); if(!real) return;
+    const pic = img.closest('picture'); if(pic){ const webp = pic.querySelector('source[type="image/webp"]'); if(webp){ if(real.endsWith('.webp')) webp.setAttribute('srcset', real); else webp.remove(); } }
+    img.setAttribute('src', real); img.setAttribute('loading','eager'); img.setAttribute('fetchpriority','high');
+  });
+});
+// === End misc ===
 // 3) Listener de “double-tap” en móvil (touchend)
 let lastTap = 0;
 popupImg.addEventListener('touchend', e => {
