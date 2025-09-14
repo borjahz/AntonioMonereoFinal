@@ -22,6 +22,37 @@
        <link href="dist/output.css" rel="stylesheet" />
        <link rel="icon" href="dist/images/favicon.ico" />
       
+  <!-- Overrides: botones con estilo de enlace (sin recuadro) en header/filtros -->
+  <style>
+    /* Solo en el header de escritorio */
+    .header .filter-controls .filter-btn,
+    .header .nav-controls .btn,
+    .header .dropdown .dropdown-toggle {
+      background: none !important;
+      border: none !important;
+      color: var(--accent) !important;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0;
+      text-decoration: none;
+      box-shadow: none;
+    }
+    .header .filter-controls .filter-btn:hover,
+    .header .filter-controls .filter-btn:focus,
+    .header .nav-controls .btn:hover,
+    .header .nav-controls .btn:focus,
+    .header .dropdown .dropdown-toggle:hover,
+    .header .dropdown .dropdown-toggle:focus {
+      text-decoration: underline;
+      outline: none;
+    }
+    .header .filter-controls .filter-btn.active {
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    /* Asegura que los iconos hereden el color de enlace */
+    .header .nav-controls .btn i { color: inherit; }
+  </style>
+      
 </head>
 <body>
  
