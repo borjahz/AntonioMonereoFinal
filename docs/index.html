@@ -158,10 +158,10 @@
   <style>
     /* Forzar margen bajo el header en tablet/desktop para que nada se meta debajo */
     @media (min-width: 600px) and (max-width: 1023px) {
-      .gallery-container { margin-top: 4.6rem !important; }
+      .gallery-container { margin-top: 0 !important; }
     }
     @media (min-width: 1024px) {
-      .gallery-container { margin-top: 5.0rem !important; }
+      .gallery-container { margin-top: 0 !important; }
     }
   </style>
   <style>
@@ -263,11 +263,13 @@
   <style>
     /* Desktop fix: aseguramos hueco bajo el header y que las carpetas no queden cortadas */
     @media (min-width: 1024px) {
-      .image-gallery { padding-top: 8rem !important; }
-      /* Fija la fila de carpetas suficientemente baja para que no se corten */
+      :root { --desk-header-h: 4.6rem; }
+      /* Usa la altura real del header si está definida, con un pequeño respiro */
+      .image-gallery { padding-top: calc(var(--desk-header-h, 4.6rem) + 0.125rem) !important; }
+      /* Coloca las carpetas justo por debajo del header */
       #Folder2025, #Folder2024, #Folder2023, #Folder2021, #Folder2020,
       #PaintFolder2025, #PaintFolderPrev,
-      #DrawFolder2025 { top: 8rem !important; }
+      #DrawFolder2025 { top: calc(var(--desk-header-h, 4.6rem) + 0.125rem) !important; }
       /* Evitar recortes: las carpetas no deben heredar aspect-ratio ni alturas máximas */
       .image-gallery .draggable.folder-year {
         aspect-ratio: auto !important;
@@ -292,6 +294,59 @@
     body.cat-copias   .image-gallery .draggable.folder-year[data-category="copias"]   { display: block; }
     body.cat-pinturas .image-gallery .draggable.folder-year[data-category="pinturas"] { display: block; }
     body.cat-dibujos  .image-gallery .draggable.folder-year[data-category="dibujos"]  { display: block; }
+  </style>
+  <style>
+    /* Corregir carpeta + etiqueta en móvil: evitar recortes por aspect-ratio del contenedor */
+    .image-gallery .draggable.folder-year {
+      aspect-ratio: auto !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+    @media (max-width: 600px) {
+      .folder-year .folder-caption { font-size: .85rem; line-height: 1.2; color: #9ca3af; margin-top: 2px; }
+    }
+  </style>
+  <style>
+    /* Tamaño de carpetas por dispositivo */
+    @media (max-width: 600px) {
+      /* Móvil: más grandes y en columna */
+      .image-gallery .draggable.folder-year { max-width: none; max-height: none; }
+      .folder-year .folder-icon { width: 56vw; height: auto; }
+      /* Columna forzada: todas con el mismo left */
+      #Folder2025, #Folder2024, #Folder2023, #Folder2021, #Folder2020,
+      #PaintFolder2025, #PaintFolderPrev, #DrawFolder2025 { left: 4% !important; }
+      /* Ajuste fino de separación vertical usando altura real del header móvil */
+      :root { --mob-header-h: 3.9rem; }
+      .image-gallery { padding-top: calc(var(--mob-header-h, 3.9rem) + 0.02rem) !important; }
+      #Folder2025 { top: calc(var(--mob-header-h, 3.9rem) + 0.02rem) !important; }
+      #Folder2024 { top: calc(var(--mob-header-h, 3.9rem) + 11rem) !important; }
+      #Folder2023 { top: calc(var(--mob-header-h, 3.9rem) + 22rem) !important; }
+      #Folder2021 { top: calc(var(--mob-header-h, 3.9rem) + 33rem) !important; }
+      #Folder2020 { top: calc(var(--mob-header-h, 3.9rem) + 44rem) !important; }
+      #PaintFolder2025 { top: calc(var(--mob-header-h, 3.9rem) + 0.02rem) !important; }
+      #PaintFolderPrev { top: calc(var(--mob-header-h, 3.9rem) + 11rem) !important; }
+      #DrawFolder2025 { top: calc(var(--mob-header-h, 3.9rem) + 0.02rem) !important; }
+    }
+    @media (min-width: 600px) and (max-width: 1023px) {
+      /* Tablet: tamaño intermedio y posición bajo header */
+      .image-gallery .draggable.folder-year { max-width: 16vw; max-height: 16vh; }
+      .image-gallery { padding-top: calc(var(--tab-header-h, 4rem) + 0.125rem) !important; }
+      #Folder2025, #Folder2024, #Folder2023, #Folder2021, #Folder2020,
+      #PaintFolder2025, #PaintFolderPrev, #DrawFolder2025 { top: calc(var(--tab-header-h, 4rem) + 0.125rem) !important; }
+    }
+  </style>
+  <style>
+    /* Tablet: forzar posiciones horizontales por encima de reglas anteriores */
+    @media (min-width: 600px) and (max-width: 1023px) {
+      #Folder2025 { left: 6%  !important; }
+      #Folder2024 { left: 24% !important; }
+      #Folder2023 { left: 42% !important; }
+      #Folder2021 { left: 60% !important; }
+      #Folder2020 { left: 78% !important; }
+      #PaintFolder2025 { left: 6%  !important; }
+      #PaintFolderPrev { left: 24% !important; }
+      #DrawFolder2025 { left: 6%  !important; }
+    }
   </style>
   
   <style>
@@ -902,14 +957,38 @@ Yo querÃ­a pintar una imagen llena de equilibrio y encontrÃ© el motivo en mi
           setTimeout(applyFolders, 0);
         });
       }
+      // Bloquear solo doble‑clic en carpetas (no interferir con click ni arrastre)
+      document.querySelectorAll('.folder-year').forEach(function(f){
+        f.addEventListener('dblclick', function(e){ e.preventDefault(); e.stopPropagation(); }, true);
+      });
     });
     // Reaplicar tras clics en filtros (desktop/móvil/sheet)
     document.addEventListener('click', function(e){
-      if (e.target.closest('.filter-btn') || e.target.closest('.mobile-nav-btn[data-filter]') || e.target.closest('.sheet-filter')) {
-        window.__forceNoCat = false;
-        setTimeout(applyFolders, 0);
-      }
+      const fb = e.target.closest('.filter-btn');
+      const mb = e.target.closest('.mobile-nav-btn[data-filter]');
+      const sb = e.target.closest('.sheet-filter');
+      if (fb) { window.__forceNoCat = false; window.__currentCat = fb.dataset.cat || null; setTimeout(applyFolders, 0); }
+      else if (mb) { window.__forceNoCat = false; window.__currentCat = mb.getAttribute('data-filter') || null; setTimeout(applyFolders, 0); }
+      else if (sb) { window.__forceNoCat = false; window.__currentCat = sb.dataset.cat || null; setTimeout(applyFolders, 0); }
     }, true);
+  })();
+</script>
+<script>
+  // Calcular altura real del header de escritorio y reflejarla en --desk-header-h
+  (function(){
+    function setHeaderVar(){
+      var hdr = document.querySelector('.header') || document.querySelector('.mobile-header');
+      if (!hdr) return;
+      var h = hdr.getBoundingClientRect().height;
+      // Valor mínimo razonable para evitar 0 en cálculos
+      if (h && h > 0) document.documentElement.style.setProperty('--desk-header-h', h + 'px');
+      // Para tablet usamos otra variable (por si la cabecera activa difiere)
+      if (h && h > 0) document.documentElement.style.setProperty('--tab-header-h', h + 'px');
+      // Para móvil
+      if (h && h > 0) document.documentElement.style.setProperty('--mob-header-h', h + 'px');
+    }
+    window.addEventListener('DOMContentLoaded', setHeaderVar);
+    window.addEventListener('resize', setHeaderVar);
   })();
 </script>
 <script>
@@ -1009,6 +1088,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </footer></body>
 </html>
+
 
 
 

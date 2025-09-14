@@ -613,11 +613,12 @@ load();
       }
     };
 // — Tap sencillo en móvil para abrir popup —
-// 1) dejamos intacto el dblclick para escritorio
-i.ondblclick = () => showPop(i);
+// 1) dejamos intacto el dblclick para escritorio (evitar en carpetas)
+const isFolder = i.classList.contains('folder-year');
+i.ondblclick = isFolder ? null : (() => showPop(i));
 
 // 2) añadimos click sólo en dispositivos táctiles
-if ('ontouchstart' in window) {
+if ('ontouchstart' in window && !isFolder) {
   i.addEventListener('click', e => {
     e.stopPropagation();   // que no “rebote” el click al overlay
     showPop(i);
@@ -637,7 +638,7 @@ if ('ontouchstart' in window) {
           y = Math.min(R.height - i.offsetHeight, y + keyStep); moved = true; break;
         case 'Enter':
         case ' ':
-          showPop(i); break;
+          if (!isFolder) showPop(i); break;
       }
       if (moved) {
         e.preventDefault();
