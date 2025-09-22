@@ -151,7 +151,8 @@ function load() {
   document.querySelectorAll('.draggable').forEach(img => {
     let x, y;
 
-    if (saved[img.id] != null) {
+    const forceDefault = img.classList.contains('folder-year') && isDesktop();
+    if (saved[img.id] != null && !forceDefault) {
       // Si hay posici+¦n guardada, +¦sala
       x = saved[img.id].x;
       y = saved[img.id].y;
@@ -305,14 +306,66 @@ document.addEventListener('click', () => {
 
 // 1) Cachea nodos
 const galleryItems = Array.from(document.querySelectorAll('.image-gallery .draggable'));
-// 2) Define la funci+¦n de filtrado
+const desktopMedia = window.matchMedia('(min-width:1024px)');
+const isDesktop = () => desktopMedia.matches;
+const folderRowTop = 24;
+const folderRowGap = 24;
+
+function getFolderSortValue(folder) {
+  const caption = folder.querySelector('.folder-caption');
+  if (!caption) return Number.NEGATIVE_INFINITY;
+  const text = caption.textContent.trim();
+  const numeric = parseInt(text, 10);
+  if (!Number.isNaN(numeric)) return numeric;
+  return text.toLowerCase().includes('anteriores') ? -1 : Number.NEGATIVE_INFINITY;
+}
+
+function arrangeDesktopFolders(cat) {
+  if (!isDesktop() || !cat || cat === 'all') return;
+  const gallery = document.querySelector('.gallery-container');
+  if (!gallery) return;
+  const folders = Array.from(document.querySelectorAll(`.folder-year[data-category="${cat}"]`))
+    .filter(folder => getComputedStyle(folder).display !== 'none');
+  if (!folders.length) return;
+  folders.sort((a, b) => getFolderSortValue(b) - getFolderSortValue(a));
+  let currentLeft = folderRowGap;
+  folders.forEach(folder => {
+    const width = folder.getBoundingClientRect().width || folder.offsetWidth || 120;
+    const x = currentLeft;
+    const y = folderRowTop;
+    folder.style.left = `${x}px`;
+    folder.style.top = `${y}px`;
+    defaultPositions[folder.id] = { x, y };
+    currentLeft += width + folderRowGap;
+  });
+}
+
+function ensureDesktopFoldersLayout() {
+  const active = document.querySelector('.filter-btn.active');
+  const cat = active ? active.dataset.cat : 'all';
+  arrangeDesktopFolders(cat);
+}
+
+if (desktopMedia.addEventListener) {
+  desktopMedia.addEventListener('change', e => {
+    if (e.matches) ensureDesktopFoldersLayout();
+  });
+} else {
+  desktopMedia.addListener(e => {
+    if (e.matches) ensureDesktopFoldersLayout();
+  });
+}
+
+// 2) Define la función de filtrado
 function filterBy(cat) {
   galleryItems.forEach(img => {
-    img.style.display = (cat === 'all' || img.dataset.category === cat) ? '' : 'none';
+    const shouldDisplay = cat !== 'all' && img.dataset.category === cat;
+    img.style.display = shouldDisplay ? '' : 'none';
   });
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.cat === cat);
   });
+  arrangeDesktopFolders(cat);
 }
 // 0) Cachear el homeBtn m+¦vil
 const homeBtnMobile = document.getElementById('homeBtn');
@@ -579,6 +632,7 @@ load();
 
   imgs.forEach(i => {
     i.onpointerdown = e => {
+      if (isDesktop() && i.classList.contains('folder-year')) return;
       // S+¦lo preventDefault si no es touch, para no romper el dobleÔÇÉtap en m+¦vil
       if (e.pointerType !== 'touch') {
         e.preventDefault();
@@ -852,4 +906,3 @@ popupImg.addEventListener('touchend', e => {
   lastTap = currentTime;
 });
 });
-
