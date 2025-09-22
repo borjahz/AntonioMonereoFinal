@@ -1,4 +1,4 @@
-// â€”â€”â€” Google Analytics condicional â€”â€”â€”
+// ÔÇöÔÇöÔÇö Google Analytics condicional ÔÇöÔÇöÔÇö
 function loadAnalytics() {
   if (document.getElementById('ga-script')) return;
   const s = document.createElement('script');
@@ -38,44 +38,74 @@ function initCookieModal() {
   });
 }
 function setupLegalModals() {
-  document.querySelectorAll('[data-modal]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const modalId = btn.getAttribute('data-modal');
-      document.getElementById(modalId).classList.remove('hidden');
+  // Abrir modales
+  document.querySelectorAll('[data-modal]').forEach(trigger => {
+    const modalId = trigger.getAttribute('data-modal');
+    const modal = document.getElementById(modalId);
+    const closeBtn = modal.querySelector('[data-close]');
+    trigger.addEventListener('click', event => {
+      event.preventDefault();
+      // Mostrar
+      modal.classList.remove('hidden');
+      modal.classList.add('active');
+      // Aria
+      trigger.setAttribute('aria-expanded', 'true');
+      // Focus en el bot+¦n de cerrar
+      closeBtn.focus();
     });
   });
-  document.querySelectorAll('[data-close]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      btn.closest('.modal').classList.add('hidden');
+
+  // Cerrar modales
+  document.querySelectorAll('[data-close]').forEach(closeBtn => {
+    const modal = closeBtn.closest('.modal');
+    const triggerId = modal.id && document.querySelector(`[data-modal="${modal.id}"]`);
+    closeBtn.addEventListener('click', () => {
+      // Ocultar
+      modal.classList.remove('active');
+      modal.classList.add('hidden');
+      // Aria
+      if (triggerId) triggerId.setAttribute('aria-expanded', 'false');
+      // Devolver foco al disparador
+      triggerId && triggerId.focus();
     });
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.active').forEach(modal => {
+        modal.classList.remove('active');
+        modal.classList.add('hidden');
+        const trigger = document.querySelector(`[data-modal="${modal.id}"]`);
+        if (trigger) {
+          trigger.setAttribute('aria-expanded', 'false');
+          trigger.focus();
+        }
+      });
+    }
   });
 }
-
-// Dentro de window.load:
+  // ÔÇªel resto de tu init para splash/galer+¡a, etc.
 window.addEventListener('load', () => {
-  initCookieModal();
-  setupLegalModals();
-  // â€¦el resto de tu init para splash/galerÃ­a, etc.
-
   const splash      = document.getElementById('splash');
   const video       = document.getElementById('splashVideo');
   const mainContent = document.getElementById('mainContent');
   if (!splash || !video || !mainContent) return;
-  // >>> Forzamos atributos imprescindibles para autoplay en mÃ³vil:
+  // >>> Forzamos atributos imprescindibles para autoplay en m+¦vil:
   video.autoplay = true;
   video.muted = true;
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
   video.setAttribute('preload', 'auto');
 
-  // --- Opcional: arrancar sÃ³lo cuando haya suficiente buffer ---
+  // --- Opcional: arrancar s+¦lo cuando haya suficiente buffer ---
   video.addEventListener('canplaythrough', () => {
   video.play().catch(() => {
     /* Autoplay might be blocked; ignore the error */
   });
 });
 
-  // Cuando el vÃ­deo termina, lanzamos la transiciÃ³n cruzada
+  // Cuando el v+¡deo termina, lanzamos la transici+¦n cruzada
   video.addEventListener('ended', () => {
   splash.addEventListener('transitionend', () => {
     splash.remove();
@@ -97,7 +127,7 @@ window.addEventListener('load', () => {
   });
 });
 
-// â€”â€”â€” Global keys & state â€”â€”â€”
+// ÔÇöÔÇöÔÇö Global keys & state ÔÇöÔÇöÔÇö
 const dataKey = 'fs_positions';
 const defaultPositions = {};
 const darkKey = 'fs_dark';
@@ -122,11 +152,11 @@ function load() {
     let x, y;
 
     if (saved[img.id] != null) {
-      // Si hay posiciÃ³n guardada, Ãºsala
+      // Si hay posici+¦n guardada, +¦sala
       x = saved[img.id].x;
       y = saved[img.id].y;
     } else {
-      // Si no hay guardado, usa la posiciÃ³n por defecto del CSS
+      // Si no hay guardado, usa la posici+¦n por defecto del CSS
       const def = defaultPositions[img.id] || { x: 0, y: 0 };
       x = def.x;
       y = def.y;
@@ -156,7 +186,7 @@ function toggleDark() {
   localStorage.setItem(darkKey, d);
 }
 function showPop(i) {
-  console.log('ğŸ”” showPop invocado para', i.id);
+  console.log('­ƒöö showPop invocado para', i.id);
   const pop = document.getElementById('popup');
   const imgTag = document.getElementById('popupImage');
   const titleTag= document.getElementById('popupTitle');
@@ -167,7 +197,7 @@ function showPop(i) {
   imgTag.src     = nuevaSrc;
 
   titleTag.textContent = i.alt;
-    // Permitir saltos de lÃ­nea o HTML sencillo en la descripciÃ³n
+    // Permitir saltos de l+¡nea o HTML sencillo en la descripci+¦n
   descTag.innerHTML = (i.dataset.description || '').replace(/\n/g, '<br>');
     // 3) Limpiar la lista de detalles (para evitar duplicados de popups anteriores)
   detalleLista.innerHTML = '';
@@ -185,11 +215,11 @@ function showPop(i) {
     const inspiracion = i.dataset.detailInspiracion || 'No disponible';
 
     const items = [
-      `TÃ©cnica: ${tecnica}`,
+      `T+®cnica: ${tecnica}`,
       `Medidas: ${medidas}`,
-      `AÃ±o de ejecuciÃ³n: ${ano}`,
+      `A+¦o de ejecuci+¦n: ${ano}`,
       `Proceso creativo: ${proceso}`,
-      `InspiraciÃ³n: ${inspiracion}`
+      `Inspiraci+¦n: ${inspiracion}`
     ];
 
     items.forEach(texto => {
@@ -209,24 +239,26 @@ function closePop() {
 }
 
 
-// â€”â€”â€” Main initialization â€”â€”â€”
+// ÔÇöÔÇöÔÇö Main initialization ÔÇöÔÇöÔÇö
 
   document.addEventListener('DOMContentLoaded', () => {
+  initCookieModal();
+   setupLegalModals();
 
     localStorage.removeItem(dataKey);
-      // â€”â€”â€” Textos traducibles â€”â€”â€”
+      // ÔÇöÔÇöÔÇö Textos traducibles ÔÇöÔÇöÔÇö
   const texts = {
     // Nav / modales
     about:           { es: 'Info',             en: 'About' },
     contact:         { es: 'Contacto',          en: 'Contact' },
-    aboutTitle:      { es: 'Sobre Family Style',en: 'About Family Style' },
-    contactTitle:    { es: 'EnvÃ­anos un email',  en: 'Send us an email' },
+    aboutTitle:      { es: 'Sobre Antonio Monereo',en: 'About Antonio Monereo' },
+    contactTitle:    { es: 'Env+¡anos un email',  en: 'Send us an email' },
     close:           { es: 'Cerrar',            en: 'Close' },
-    aboutInfo:     { es: 'Family Style es un estudio de diseÃ±o y desarrollo web.', en: 'Family Style is a web design and development studio.' },
+    aboutInfo:     { es: 'Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentr+¦ muy pronto en el mundo del arte: comenz+¦ a dibujar desde ni+¦o, gan+¦ un primer premio en el certamen "Toledo desde el Alc+ízar" (2016) y desde 2019 ejerce como uno de los copistas m+ís j+¦venes del Museo del Prado. Su acercamiento al arte es profundamente cl+ísico, con una destacada t+®cnica acad+®mica, pero tambi+®n muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.',
+       en: 'Antonio Monereo (Madrid, 2001) is a young painter and draftsman who studied Fine Arts at the Complutense University and Art History at the UNED. He discovered his passion for art early on, began drawing as a child, won first prize in the "Toledo from the Alc+ízar" contest in 2016, and has been one of the youngest official copyists at the Prado Museum since 2019. His approach to art is deeply classical, with a strong academic technique, yet also deeply personal: in interviews, he has shared that painting has been both a refuge and a way to affirm his identity and find his place in the world.' },
     pubBtn:         { es: 'Publicaciones',    en: 'Publications' },
     Shangay:      { es: 'Entrevista Shangay',         en: 'Shangay Interview' },
     Telemadrid: { es: 'Entrevista Telemadrid',        en: 'Telemadrid Interview' },
-    Elbloque:   { es: 'ExposiciÃ³n El Bloque',          en: 'El Bloque Exhibition' },
     // Filtros
     filterAll:       { es: 'Antonio Monereo',  en: 'Antonio Monereo' },
     filterCopies:    { es: 'Copias',           en: 'Copies' },
@@ -255,178 +287,46 @@ function closePop() {
       lang = (lang === 'es' ? 'en' : 'es');
       applyLang(lang);
     });
-    // â€” Toggle del menÃº de Publicaciones â€”
+    // ÔÇö Toggle del men+¦ de Publicaciones ÔÇö
 const pubBtn  = document.getElementById('pubBtn');
 const pubMenu = document.getElementById('pubMenu');
 const bottomSheet = document.getElementById('bottomSheet');
 
-const initFolderVisibility = () => {
-  const folders = Array.from(document.querySelectorAll('.folder-year'));
-  if (!folders.length) return;
-  const validCats = new Set(['copias', 'pinturas', 'dibujos']);
-  const bodyClasses = ['cat-copias', 'cat-pinturas', 'cat-dibujos'];
-
-  const apply = (cat) => {
-    const normalized = (!window.__forceNoCat && cat && validCats.has(cat)) ? cat : null;
-    window.__currentCat = normalized;
-    document.body.classList.remove(...bodyClasses);
-    folders.forEach(el => {
-      const match = normalized && el.getAttribute('data-category') === normalized;
-      el.style.display = match ? 'block' : 'none';
-    });
-    if (normalized) document.body.classList.add('cat-' + normalized);
-  };
-
-  window.__forceNoCat = false;
-  window.__currentCat = null;
-  folders.forEach(el => { el.style.display = 'none'; });
-
-  window.__setFolders = (cat) => apply(cat);
-
-  const schedule = (cat) => {
-    const normalized = (cat && validCats.has(cat)) ? cat : null;
-    window.__forceNoCat = !normalized;
-    setTimeout(() => apply(normalized), 0);
-  };
-  const reset = () => {
-    window.__forceNoCat = true;
-    setTimeout(() => apply(null), 0);
-  };
-
-  const hook = (btn, getCat) => btn.addEventListener('click', () => schedule(getCat(btn)));
-
-  document.querySelectorAll('.filter-btn').forEach(btn => hook(btn, el => el.dataset.cat));
-  document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => hook(btn, el => el.getAttribute('data-filter')));
-  document.querySelectorAll('.sheet-filter').forEach(btn => hook(btn, el => el.dataset.cat));
-
-  const homeBtn = document.getElementById('homeBtn');
-  if (homeBtn) homeBtn.addEventListener('click', reset);
-
-  const active = document.querySelector('.filter-btn.active');
-  apply(validCats.has(active?.dataset.cat) ? active.dataset.cat : null);
-};
-
-const initFolderDefaults = () => {
-  const idMap = { copias:'Folder2025', pinturas:'PaintFolder2025', dibujos:'DrawFolder2025' };
-  const triggerDefault = (cat) => {
-    if (!cat || !(cat in idMap)) return;
-    const target = document.getElementById(idMap[cat]);
-    if (!target) return;
-    setTimeout(() => target.dispatchEvent(new MouseEvent('click', { bubbles: true })), 0);
-  };
-  const active = document.querySelector('.filter-btn.active');
-  if (active) triggerDefault(active.dataset.cat);
-  document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => triggerDefault(btn.dataset.cat)));
-  document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => btn.addEventListener('click', () => triggerDefault(btn.getAttribute('data-filter'))));
-  document.querySelectorAll('.sheet-filter').forEach(btn => btn.addEventListener('click', () => triggerDefault(btn.dataset.cat)));
-
-  const CLOSED='dist/images/aqua-icons/Aqua  Folder.ico', OPEN='dist/images/aqua-icons/Aqua Favorites.ico';
-  const folders = Array.from(document.querySelectorAll('.folder-year'));
-  const setOpen = (folder) => {
-    const cat = folder.getAttribute('data-category');
-    folders.forEach(f => {
-      if (f.getAttribute('data-category') === cat) {
-        f.classList.remove('open');
-        const icon = f.querySelector('.folder-icon');
-        if (icon) icon.src = CLOSED;
-      }
-    });
-    folder.classList.add('open');
-    const icon = folder.querySelector('.folder-icon');
-    if (icon) icon.src = OPEN;
-  };
-  folders.forEach(f => f.addEventListener('click', e => { e.stopPropagation(); setOpen(f); }));
-};
-
-const initCopiasFolders = () => {
-  const hideIds = (ids) => ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  const showId = (id) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'block';
-  };
-  hideIds(['Velazquez', 'Gijon']);
-  const folder2021 = document.getElementById('Folder2021');
-  const folder2023 = document.getElementById('Folder2023');
-  if (folder2021) folder2021.addEventListener('click', () => {
-    showId('Velazquez');
-    hideIds(['Gijon']);
-  });
-  if (folder2023) folder2023.addEventListener('click', () => {
-    showId('Gijon');
-    hideIds(['Velazquez']);
-  });
-  document.querySelectorAll('.folder-year[data-category="copias"]').forEach(folder => {
-    if (!folder || ['Folder2021','Folder2023'].includes(folder.id)) return;
-    folder.addEventListener('click', () => hideIds(['Velazquez', 'Gijon']));
-  });
-};
-
-const initPinturasPrev = () => {
-  const prev = document.getElementById('PaintFolderPrev');
-  const y25  = document.getElementById('PaintFolder2025');
-  const items = Array.from(document.querySelectorAll('.draggable[data-category="pinturas"]')).filter(el => !el.classList.contains('folder-year'));
-  if (!prev || !items.length) return;
-  const hide = () => items.forEach(el => el.style.display = 'none');
-  const show = () => items.forEach(el => { el.style.display = 'block'; });
-  hide();
-  prev.addEventListener('click', e => { e.stopPropagation(); show(); });
-  if (y25) y25.addEventListener('click', e => { e.stopPropagation(); hide(); });
-};
-  initFolderVisibility();
-  initFolderDefaults();
-  initCopiasFolders();
-  initPinturasPrev();
-
 // Al hacer clic, alternar la clase "open" en el contenedor .dropdown
 pubBtn.addEventListener('click', e => {
-  e.stopPropagation();             // evita cerrar al hacer clic en el botÃ³n
+  e.stopPropagation();             // evita cerrar al hacer clic en el bot+¦n
   pubBtn.parentElement.classList.toggle('open');
 });
 
-// Si haces clic fuera, cierra el menÃº
+// Si haces clic fuera, cierra el men+¦
 document.addEventListener('click', () => {
   pubBtn.parentElement.classList.remove('open');
   });
 
 // 1) Cachea nodos
-const galleryItems = Array.from(document.querySelectorAll('.image-gallery .draggable')).filter(img => !img.classList.contains('folder-year'));
-// 2) Define la funciÃ³n de filtrado
+const galleryItems = Array.from(document.querySelectorAll('.image-gallery .draggable'));
+// 2) Define la funci+¦n de filtrado
 function filterBy(cat) {
-  if (cat === 'all') {
-    galleryItems.forEach(img => { img.style.display = 'none'; });
-  } else {
-    galleryItems.forEach(img => {
-      img.style.display = (img.dataset.category === cat) ? '' : 'none';
-    });
-  }
+  galleryItems.forEach(img => {
+    img.style.display = (cat === 'all' || img.dataset.category === cat) ? '' : 'none';
+  });
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.cat === cat);
   });
-  if (cat === 'all') {
-    window.__forceNoCat = true;
-    if (typeof window.__setFolders === 'function') window.__setFolders(null);
-  } else {
-    window.__forceNoCat = false;
-    if (typeof window.__setFolders === 'function') window.__setFolders(cat);
 }
-  }
-
-// 0) Cachear el homeBtn mÃ³vil
+// 0) Cachear el homeBtn m+¦vil
 const homeBtnMobile = document.getElementById('homeBtn');
 
-// 1) Al clicar en mÃ³vil sobre "Antonio Monereo"
+// 1) Al clicar en m+¦vil sobre "Antonio Monereo"
 homeBtnMobile.addEventListener('click', e => {
   e.preventDefault();
   // a) Resetear filtros igual que si clicases "all"
   filterBy('all');
-  // b) Cerrar menÃº lateral si estuviera abierto
+  // b) Cerrar men+¦ lateral si estuviera abierto
   document.body.classList.remove('menu-open');
-  // c) Si usas bottomSheet para filtros, ciÃ©rralo tambiÃ©n
+  // c) Si usas bottomSheet para filtros, ci+®rralo tambi+®n
   if (typeof bottomSheet !== 'undefined') {
-    if (bottomSheet) bottomSheet.classList.remove('open');
+    bottomSheet.classList.remove('open');
   }
 });
 
@@ -435,13 +335,13 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const cat = btn.dataset.cat;    // 'all' | 'copias' | 'pinturas' | 'dibujos'
     filterBy(cat);
-    if (bottomSheet) bottomSheet.classList.remove('open');  // cierra el panel en mÃ³vil si estÃ¡ abierto
+    bottomSheet.classList.remove('open');  // cierra el panel en m+¦vil si est+í abierto
   });
 });
 // 4) Aplica estado inicial
 filterBy('all');
   
-  // â€” ACCIONES DE NAVEGACIÃ“N â€”  
+  // ÔÇö ACCIONES DE NAVEGACI+ôN ÔÇö  
   document.querySelectorAll('.sheet-nav').forEach(btn => {
     btn.addEventListener('click', () => {
       switch (btn.dataset.action) {
@@ -450,11 +350,11 @@ filterBy('all');
         case 'dark':    document.getElementById('darkModeToggle').click();break;
         case 'reset':   document.getElementById('resetBtn').click();      break;
       }
-      if (bottomSheet) bottomSheet.classList.remove('open');
+      bottomSheet.classList.remove('open');
     });
   });
 
-  // â€” RESET, DARK, ABOUT, CONTACT â€”  
+  // ÔÇö RESET, DARK, ABOUT, CONTACT ÔÇö  
   const resetBtn   = document.getElementById('resetBtn');
   const darkBtn    = document.getElementById('darkModeToggle');
   const aboutBtn  = document.getElementById('aboutBtn');
@@ -462,9 +362,9 @@ filterBy('all');
   const closeAbout = document.getElementById('closeAbout');
   const pop        = document.getElementById('popup');
   const closePopBtn= document.getElementById('closePopup');
-// â€” HEADER MÃ“VIL: hamburguesa, home y lupa â€”
+// ÔÇö HEADER M+ôVIL: hamburguesa, home y lupa ÔÇö
 
-// 1) MenÃº hamburguesa (tÃº lo usarÃ¡s para mostrar tu nav lateral)
+// 1) Men+¦ hamburguesa (t+¦ lo usar+ís para mostrar tu nav lateral)
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const mobileNav     = document.getElementById('mobileNav');
 hamburgerBtn.addEventListener('click', () => {
@@ -472,25 +372,25 @@ hamburgerBtn.addEventListener('click', () => {
   hamburgerBtn.setAttribute('aria-expanded', String(!isExpanded));
   mobileNav.hidden = isExpanded;
   document.body.classList.toggle('menu-open', !isExpanded);
-  // Opcional: mueve el foco al primer Ã­tem del menÃº
+  // Opcional: mueve el foco al primer +¡tem del men+¦
   if (!isExpanded) {
     mobileNav.querySelector('[role="menuitem"]')?.focus();
   }
   hamburgerBtn.setAttribute(
   'aria-label',
-  !isExpanded ? 'Cerrar menÃº' : 'Abrir menÃº'
+  !isExpanded ? 'Cerrar men+¦' : 'Abrir men+¦'
 );
 hamburgerBtn.focus();
 });
-// â€”â€”â€” Cerrar menÃº al hacer click en un Ã­tem â€”â€”â€”
+// ÔÇöÔÇöÔÇö Cerrar men+¦ al hacer click en un +¡tem ÔÇöÔÇöÔÇö
 const menuItems = mobileNav.querySelectorAll('[role="menuitem"]');
 menuItems.forEach(item => {
   item.addEventListener('click', () => {
     // 1) Cerrar el nav
     mobileNav.hidden = true;
-    // 2) Actualizar ARIA en el botÃ³n
+    // 2) Actualizar ARIA en el bot+¦n
     hamburgerBtn.setAttribute('aria-expanded', 'false');
-    hamburgerBtn.setAttribute('aria-label', 'Abrir menÃº');
+    hamburgerBtn.setAttribute('aria-label', 'Abrir men+¦');
     // 3) Quitar clase de estilos abiertos (si la usas)
     document.body.classList.remove('menu-open');
     // 4) (Opcional) devolver foco al contenido principal  
@@ -498,11 +398,11 @@ menuItems.forEach(item => {
   });
 });
 
-// 1) Filtros: reutiliza tu funciÃ³n `filterGallery`
+// 1) Filtros: reutiliza tu funci+¦n `filterGallery`
 document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => {
   btn.addEventListener('click', () => {
     const filt = btn.getAttribute('data-filter');
-    filterBy(filt);            // â† usa la funciÃ³n existente
+    filterBy(filt);            // ÔåÉ usa la funci+¦n existente
     document.body.classList.remove('menu-open');
   });
 });
@@ -520,7 +420,7 @@ document.getElementById('contactNav').addEventListener('click', () => {
   document.getElementById('contactBtn').click();
   document.body.classList.remove('menu-open');
 });
-// â€” Toggle del submenÃº â€œPublicacionesâ€ â€”
+// ÔÇö Toggle del submen+¦ ÔÇ£PublicacionesÔÇØ ÔÇö
 const pubNavBtn = document.getElementById('pubNav');
 const pubNavLi  = pubNavBtn.parentElement;  // <li class="has-submenu">
 pubNavBtn.addEventListener('click', e => {
@@ -531,7 +431,7 @@ pubNavBtn.addEventListener('click', e => {
 
 });
 
-// Cerrar submenÃº si clicas fuera del mismo
+// Cerrar submen+¦ si clicas fuera del mismo
 document.addEventListener('click', () => {
   if (pubNavLi.classList.contains('open')) {
     pubNavBtn.setAttribute('aria-expanded', 'false');
@@ -540,13 +440,13 @@ document.addEventListener('click', () => {
 });
 
 
-// 2) BotÃ³n Home (scroll al inicio)
+// 2) Bot+¦n Home (scroll al inicio)
 const homeBtn = document.getElementById('homeBtn');
 homeBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
- // â€”â€”â€” BÃšSQUEDA SOBRE LA GALERÃA â€”â€”â€”
+ // ÔÇöÔÇöÔÇö B+ÜSQUEDA SOBRE LA GALER+ìA ÔÇöÔÇöÔÇö
  const searchBtns      = [
   document.getElementById('searchBtnMobile'),
   document.getElementById('searchBtnDesktop')
@@ -557,7 +457,7 @@ const searchForm      = document.getElementById('searchForm');
 const searchInput     = document.getElementById('searchInput');
 const thumbnails      = Array.from(document.querySelectorAll('.draggable'));
 
-// 1) Engancha el mismo handler a cada botÃ³n de bÃºsqueda
+// 1) Engancha el mismo handler a cada bot+¦n de b+¦squeda
 searchBtns.forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -589,7 +489,7 @@ searchForm.addEventListener('submit', e => {
     img.style.display = hayTexto.includes(q) ? '' : 'none';
   });
 });
-// â€”â€”â€” FIN BÃšSQUEDA â€”â€”â€”
+// ÔÇöÔÇöÔÇö FIN B+ÜSQUEDA ÔÇöÔÇöÔÇö
 
 
 
@@ -605,7 +505,7 @@ searchForm.addEventListener('submit', e => {
   // Dark mode persistente
   if (localStorage.getItem(darkKey) === 'true') document.body.classList.add('dark');
   darkBtn.onclick = toggleDark;
-  // Modal About
+  /* Modal About
   aboutBtn.addEventListener('click', e => {
      e.preventDefault();
      aboutSec.classList.remove('hidden');
@@ -616,7 +516,7 @@ searchForm.addEventListener('submit', e => {
   
   closeAbout.onclick = () => aboutSec.classList.add('hidden');
 
- // â€”â€” Modal Contact â€”â€”
+ // ÔÇöÔÇö Modal Contact ÔÇöÔÇö
    // 1) Captura correctamente todos los nodos que vas a usar
    const contactSec     = document.getElementById('contactSection');
    const closeContact   = document.getElementById('closeContact');
@@ -630,7 +530,7 @@ contactBtn.addEventListener('click', () => {
   contactBtn.setAttribute('aria-expanded', 'true');
   sendMailBtn.focus();    // o closeContact.focus();
 });
-// Cerrar modal (botÃ³n X)
+// Cerrar modal (bot+¦n X)
 closeContact.addEventListener('click', () => {
   contactSec.classList.add('hidden');
   contactBtn.setAttribute('aria-expanded', 'false');
@@ -655,14 +555,14 @@ document.addEventListener('keydown', e => {
       if (pop.classList.contains('active')) closePop();
     }
   });
-
-  // â€” CONFIGURAR IMÃGENES DRAG & POPUP â€”  
+*/
+  // ÔÇö CONFIGURAR IM+üGENES DRAG & POPUP ÔÇö  
   const imgs = Array.from(document.querySelectorAll('.draggable'));
   imgs.forEach(img => {
       img.style.position = 'absolute';
     });
 imgs.forEach(img => {
-  const galleryRect = getRect();              // tu funciÃ³n que devuelve .gallery-container.getBoundingClientRect()
+  const galleryRect = getRect();              // tu funci+¦n que devuelve .gallery-container.getBoundingClientRect()
 const imgRect     = img.getBoundingClientRect();
 defaultPositions[img.id] = {
   x: imgRect.left - galleryRect.left,
@@ -679,7 +579,7 @@ load();
 
   imgs.forEach(i => {
     i.onpointerdown = e => {
-      // SÃ³lo preventDefault si no es touch, para no romper el dobleâ€tap en mÃ³vil
+      // S+¦lo preventDefault si no es touch, para no romper el dobleÔÇÉtap en m+¦vil
       if (e.pointerType !== 'touch') {
         e.preventDefault();
       }
@@ -712,14 +612,15 @@ load();
         state.el = null;
       }
     };
-// â€” Tap sencillo en mÃ³vil para abrir popup â€”
-// 1) dejamos intacto el dblclick para escritorio
-i.ondblclick = () => showPop(i);
+// ÔÇö Tap sencillo en m+¦vil para abrir popup ÔÇö
+// 1) dejamos intacto el dblclick para escritorio (evitar en carpetas)
+const isFolder = i.classList.contains('folder-year');
+i.ondblclick = isFolder ? null : (() => showPop(i));
 
-// 2) aÃ±adimos click sÃ³lo en dispositivos tÃ¡ctiles
-if ('ontouchstart' in window) {
+// 2) a+¦adimos click s+¦lo en dispositivos t+íctiles
+if ('ontouchstart' in window && !isFolder) {
   i.addEventListener('click', e => {
-    e.stopPropagation();   // que no â€œreboteâ€ el click al overlay
+    e.stopPropagation();   // que no ÔÇ£reboteÔÇØ el click al overlay
     showPop(i);
   });
 }
@@ -737,7 +638,7 @@ if ('ontouchstart' in window) {
           y = Math.min(R.height - i.offsetHeight, y + keyStep); moved = true; break;
         case 'Enter':
         case ' ':
-          showPop(i); break;
+          if (!isFolder) showPop(i); break;
       }
       if (moved) {
         e.preventDefault();
@@ -751,7 +652,7 @@ if ('ontouchstart' in window) {
   closePopBtn.onclick = closePop;
   pop.onclick = e => { if (e.target === pop) closePop(); };
 
-  // DinÃ¡mico
+  // Din+ímico
   document.getElementById('currentYear').textContent = new Date().getFullYear();
   
 // --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------
@@ -770,7 +671,170 @@ popupImg.addEventListener('dblclick', () => {
   }
 });
 
-// 3) Listener de â€œdouble-tapâ€ en mÃ³vil (touchend)
+// === UX Enhancements moved from index.html (guarded to avoid double bind) ===
+(function(){
+  if (window._uxEnhanced) return; window._uxEnhanced = true;
+  // 1) No popup for folders
+  const overrideShowPop = () => {
+    const g = window.showPop; if (typeof g !== 'function') return;
+    window.showPop = function(el){
+      try { if (el && (el.classList?.contains('folder-year') || el.closest?.('.folder-year'))) return; } catch(_){ }
+      return g.apply(this, arguments);
+    };
+  };
+
+  // 2) Show folders only in their category + default open 2025
+  const initFolderVisibility = () => {
+    const apply = (cat) => {
+      document.querySelectorAll('.folder-year').forEach(el => {
+        el.style.display = (el.getAttribute('data-category') === cat) ? 'block' : 'none';
+      });
+    };
+    const active = document.querySelector('.filter-btn.active');
+    apply(active ? active.dataset.cat : 'all');
+    const hook = (btn, getCat) => btn.addEventListener('click', () => apply(getCat(btn)));
+    document.querySelectorAll('.filter-btn').forEach(b => hook(b, x=>x.dataset.cat));
+    document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(b => hook(b, x=>x.getAttribute('data-filter')));
+    document.querySelectorAll('.sheet-filter').forEach(b => hook(b, x=>x.dataset.cat));
+  };
+
+  // 3) Auto-open 2025 per category and folder icon toggle
+  const initFolderDefaults = () => {
+    const idMap = { copias:'Folder2025', pinturas:'PaintFolder2025', dibujos:'DrawFolder2025' };
+    const clickDefault = (cat) => { const id=idMap[cat]; const el=id&&document.getElementById(id); el&&setTimeout(()=>el.dispatchEvent(new MouseEvent('click',{bubbles:true})),0); };
+    const active = document.querySelector('.filter-btn.active'); if (active) clickDefault(active.dataset.cat);
+    document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>clickDefault(b.dataset.cat)));
+    document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(b=>b.addEventListener('click',()=>clickDefault(b.getAttribute('data-filter'))));
+    document.querySelectorAll('.sheet-filter').forEach(b=>b.addEventListener('click',()=>clickDefault(b.dataset.cat)));
+
+    const CLOSED='dist/images/aqua-icons/Aqua  Folder.ico', OPEN='dist/images/aqua-icons/Aqua Favorites.ico';
+    const folders=[...document.querySelectorAll('.folder-year')];
+    const setOpen=(f)=>{
+      const cat=f.getAttribute('data-category');
+      folders.forEach(n=>{ if(n.getAttribute('data-category')===cat){ n.classList.remove('open'); const i=n.querySelector('.folder-icon'); if(i) i.src=CLOSED; }});
+      f.classList.add('open'); const i=f.querySelector('.folder-icon'); if(i) i.src=OPEN;
+    };
+    folders.forEach(f=>f.addEventListener('click',e=>{ e.stopPropagation(); setOpen(f);}));
+  };
+
+  // 4) Pinturas: ÔÇ£AnterioresÔÇØ muestra todo; 2025 oculta
+  const initPinturasPrev = () => {
+    const prev=document.getElementById('PaintFolderPrev'); const y25=document.getElementById('PaintFolder2025');
+    const items=[...document.querySelectorAll('.draggable[data-category="pinturas"]')].filter(el=>!el.classList.contains('folder-year'));
+    if(!prev||!items.length) return;
+    const hide=()=>items.forEach(e=>e.style.display='none'); const show=()=>items.forEach(e=>{e.style.display='block';});
+    hide(); prev.addEventListener('click',e=>{e.stopPropagation(); show();}); if(y25) y25.addEventListener('click',e=>{e.stopPropagation(); hide();});
+  };
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    overrideShowPop();
+    initFolderVisibility();
+    initFolderDefaults();
+    initPinturasPrev();
+  });
+})();
+// === End UX Enhancements ===
+
+// === Layout + Captions (moved from index.html) ===
+(function(){
+  if (window._artLayout) return; window._artLayout = true;
+  const $ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+  function ensureCaption(img){
+    if (img.classList.contains('folder-year')) return null;
+    const container = document.querySelector('.image-gallery');
+    if (!container) return null;
+    let cap = container.querySelector(`.art-caption[data-for="${img.id}"]`);
+    if (!cap){ cap = document.createElement('div'); cap.className = 'art-caption'; cap.setAttribute('data-for', img.id); container.appendChild(cap); }
+    const textFromHTML = (html) => {
+      try { return (html||'').replace(/<br\s*\/?>(\s*)/gi, '\n').replace(/<p\b[^>]*>/gi,'').replace(/<\/p>/gi,'\n\n').replace(/<[^>]*>/g,'').replace(/\n{3,}/g,'\n\n').trim(); } catch { return html||''; }
+    };
+    const title = img.getAttribute('alt') || img.id || '';
+    const desc  = textFromHTML(img.dataset.description || '');
+    const short = desc.length > 220 ? (desc.slice(0,217)+'ÔÇª') : desc;
+    cap.innerHTML = `<b>${title}</b>${short? '\n'+short:''}`;
+    return cap;
+  }
+
+  function layoutVisibleArtworks(){
+    const gallery = document.querySelector('.gallery-container');
+    const container = document.querySelector('.image-gallery');
+    if(!gallery||!container) return;
+    const crect = gallery.getBoundingClientRect();
+    const visible = $('.image-gallery .draggable').filter(el=>!el.classList.contains('folder-year') && getComputedStyle(el).display!=='none');
+    if(!visible.length) return;
+    const folderBottom = Math.max(0, ...$('.folder-year').filter(f=>getComputedStyle(f).display!=='none').map(f=>f.getBoundingClientRect().bottom - crect.top));
+    const padX = Math.max(12, Math.round(crect.width*0.02));
+    const baseTop = Math.max(12, Math.round(folderBottom+16));
+    const isDesktop = matchMedia('(min-width:1024px)').matches;
+    const isTablet  = matchMedia('(min-width:600px) and (max-width:1023px)').matches;
+    const cols = isDesktop?3:isTablet?2:1;
+    const gapX = isDesktop?64:isTablet?48:32;
+    const gapY = isDesktop?80:isTablet?64:48;
+    const availW = crect.width - padX*2 - gapX*(cols-1);
+    const colW = Math.max(120, Math.floor(availW/cols));
+    const colH = new Array(cols).fill(baseTop);
+    visible.sort((a,b)=>(b.offsetHeight||0)-(a.offsetHeight||0));
+    visible.forEach(el=>{
+      let col=0; for(let i=1;i<cols;i++) if(colH[i]<colH[col]) col=i;
+      el.style.width=''; el.style.height=''; if(el.offsetWidth>colW) el.style.width=colW+'px';
+      const left = padX + col*(colW+gapX); const top = colH[col];
+      el.style.left=left+'px'; el.style.top=top+'px';
+      const cap = ensureCaption(el);
+      const h = el.offsetHeight || Math.round(colW*0.75);
+      if(cap){ cap.style.display='block'; cap.style.left=left+'px'; const capGap=6; const capTop=top+h+capGap; cap.style.top=capTop+'px'; const ch = cap.getBoundingClientRect().height||18; colH[col]=capTop+ch+gapY; }
+      else { colH[col]=top+h+gapY; }
+    });
+    const maxH = Math.max(...colH);
+    container.style.minHeight = Math.max(container.offsetHeight, maxH+40)+'px';
+  }
+
+  function syncAllCaptions(){
+    const container = document.querySelector('.image-gallery'); if(!container) return;
+    $('.image-gallery .draggable').filter(i=>!i.classList.contains('folder-year')).forEach(img=>{
+      const cap = ensureCaption(img); if(!cap) return; cap.style.display = (getComputedStyle(img).display==='none')?'none':'block';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    layoutVisibleArtworks();
+    syncAllCaptions();
+    $('.image-gallery .draggable').forEach(img=>{
+      img.addEventListener('pointermove', ()=>{ layoutVisibleArtworks(); syncAllCaptions(); });
+      img.addEventListener('pointerup',   ()=>{ layoutVisibleArtworks(); syncAllCaptions(); });
+    });
+    const reSync = ()=>{ layoutVisibleArtworks(); syncAllCaptions(); };
+    $('.filter-btn').forEach(b=>b.addEventListener('click', reSync));
+    $('.mobile-nav-btn[data-filter]').forEach(b=>b.addEventListener('click', reSync));
+    $('.sheet-filter').forEach(b=>b.addEventListener('click', reSync));
+    $('.folder-year').forEach(f=>f.addEventListener('click', reSync));
+
+    // M+¦vil: tap para ver/ocultar etiqueta sin popup
+    const isMobile = ()=> matchMedia('(max-width:600px)').matches;
+    const container = document.querySelector('.image-gallery');
+    if(container){
+      container.addEventListener('click',(e)=>{
+        if(!isMobile()) return; const img=e.target.closest?.('.draggable'); if(!img||img.classList.contains('folder-year')) return; e.stopPropagation(); e.preventDefault();
+        const cap = ensureCaption(img); if(!cap) return; const visible = cap.style.display!=='none'; container.querySelectorAll('.art-caption').forEach(c=>c.style.display='none'); if(!visible){ layoutVisibleArtworks(); syncAllCaptions(); cap.style.display='block'; }
+      }, true);
+      document.addEventListener('click',()=>{ if(!isMobile()) return; container.querySelectorAll('.art-caption').forEach(c=>c.style.display='none'); });
+    }
+  });
+})();
+// === End Layout + Captions ===
+
+// === Misc small inits ===
+document.addEventListener('DOMContentLoaded', ()=>{
+  const y = document.getElementById('currentYear'); if(y) y.textContent = new Date().getFullYear();
+  // Force full-res images
+  document.querySelectorAll('.image-gallery .draggable').forEach(img=>{
+    const real = img.getAttribute('data-popup-src'); if(!real) return;
+    const pic = img.closest('picture'); if(pic){ const webp = pic.querySelector('source[type="image/webp"]'); if(webp){ if(real.endsWith('.webp')) webp.setAttribute('srcset', real); else webp.remove(); } }
+    img.setAttribute('src', real); img.setAttribute('loading','eager'); img.setAttribute('fetchpriority','high');
+  });
+});
+// === End misc ===
+// 3) Listener de ÔÇ£double-tapÔÇØ en m+¦vil (touchend)
 let lastTap = 0;
 popupImg.addEventListener('touchend', e => {
   const currentTime = new Date().getTime();
@@ -788,8 +852,4 @@ popupImg.addEventListener('touchend', e => {
   lastTap = currentTime;
 });
 });
-
-
-
-
 

@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "main": "docs/dist/main.min.js",
   "scripts": {
-    "dev:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o docs/dist/output.css --watch",
-    "build:css": "NODE_ENV=production  postcss src/input.css -o docs/dist/output.css",
     "purge:css": "NODE_ENV=production NO_MINIFY=true postcss src/input.css -o dist/output.purge.css",
     "minify:css": "postcss src/input.css -o docs/dist/output.purge.min.css --env production && cssnano docs/dist/output.purge.css -o dist/output.purge.min.css",
     "minify:js": "terser src/main.js --compress --mangle --output docs/dist/main.min.js",
     "optimize:images": "node scripts/optimize-images.js",
-    "build": "npm run build:css && npm run minify:js && npm run optimize:images"
+    "build": "npm run build:css && npm run minify:js && npm run optimize:images",
+    "build:css": "cross-env NODE_ENV=production postcss src/input.css -o docs/dist/output.css",
+    "dev:css": "cross-env NODE_ENV=production NO_MINIFY=true postcss src/input.css -o docs/dist/output.css --watch"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,8 @@
     "@ljharb/tsconfig": "^0.3.2",
     "@tailwindcss/postcss": "^4.1.7",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.0.0",
+    "cssnano": "^7.1.1",
     "imagemin": "^9.0.1",
     "imagemin-avif": "^0.1.6",
     "imagemin-mozjpeg": "^10.0.0",
