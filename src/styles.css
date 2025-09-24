@@ -88,72 +88,186 @@ body.dark {
 
 /* Gallery container */
 .gallery-container {
-  position: fixed;
-  top: 4.66rem; /* igual a altura header */
-  right: 0;
-  bottom: 1.8rem;
-  left: 0;
-  overflow:hidden;
-  z-index: 1;
+  position: relative;
+  margin: 0 auto;
+  padding: 6rem 1.5rem 4rem;
+  max-width: 1200px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 /* Image gallery */
 .image-gallery {
-  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
   width: 100%;
-  min-height: 100vh;
 }
-.draggable {
-  position: absolute;
-  width:clamp(80px, 10vw, 120px);
+
+.folder-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.folder-year {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 140px;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+body.dark .folder-year {
+  background: rgba(59, 130, 246, 0.18);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+}
+
+.folder-year:hover,
+.folder-year:focus-within,
+.folder-year.open {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 36px rgba(15, 23, 42, 0.18);
+}
+
+.folder-year .folder-icon {
+  width: 72px;
   height: auto;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  cursor: grab;
-  transition: box-shadow .2s;
-  aspect-ratio: 2 / 2;      /* reserva un rectángulo 3:2 antes de cargar */
-    object-fit: cover;  
-  will-change: transform;
-  touch-action: none;    /* Deshabilita el scroll nativo al arrastrar */
- user-select: none;     /* Evita selecciones de texto accidentales */
-}
-.draggable:hover {
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-.draggable:active {
-  cursor: grabbing;
-}
-.draggable:focus {
-  outline: 2px solid var(--accent);
-}
-/* ======= Efecto de carga ======= */
-/* Antes de cargar: pequeño blur y baja opacidad */
-.draggable.image-loading {
-  filter: blur(8px);
-  opacity: 0.6;
 }
 
-/* Al cargarse, transición suave a sin filtro */
-.draggable {
-  /* transition ya incluye opacity y box-shadow */
-  transition: filter .5s ease, opacity .5s ease, box-shadow .2s;
-  opacity: 1;
-  filter: none;
+.folder-year .folder-caption {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: 0.02em;
 }
 
-@media (max-width: 1024px) {
-  .draggable {
-    width: clamp(70px, 20vw, 150px);
+.art-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  width: 100%;
+  justify-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .art-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-/* Posiciones iniciales de las imágenes */
-#Velazquez { left: 10%; top: 10%; }
-#Nieve     { left: 55%; top: 15%; }
-#Pablo     { left: 10%; top: 40%; }
-#Ester     { left: 80%; top: 30%; }
-#Autorretrato { left: 70%; top: 60%; }
-#Ascen    { left: 45%; top: 60%; }
-#Gijon   { left: 30%; top: 20%; }
+
+@media (min-width: 900px) {
+  .art-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .art-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.art-card {
+  display: none;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.art-card.is-visible {
+  display: block;
+}
+
+.art-card:hover,
+.art-card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 44px rgba(15, 23, 42, 0.24);
+}
+
+.art-card img.draggable {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+img.draggable {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.15);
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+img.draggable:hover,
+img.draggable:focus {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 48px rgba(15, 23, 42, 0.22);
+}
+
+img.draggable:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.art-card .draggable.image-loading {
+  filter: blur(6px);
+  opacity: 0.65;
+}
+
+.art-card .draggable.image-error {
+  filter: grayscale(0.3);
+}
+@media (max-width: 768px) {
+  .gallery-container {
+    padding: 5.5rem 1rem 3.5rem;
+  }
+  .folder-strip {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+  .folder-year {
+    min-width: 120px;
+    padding: 0.85rem 1rem;
+  }
+  .art-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-container {
+    padding: 5rem 0.75rem 3rem;
+  }
+  .folder-strip {
+    gap: 0.75rem;
+  }
+  .folder-year {
+    min-width: 110px;
+    padding: 0.75rem 0.9rem;
+  }
+  .art-grid {
+    gap: 1.25rem;
+  }
+}
 /* Splash screen */
 #splash {
   position: fixed;
@@ -906,199 +1020,7 @@ background: var(--accent);
   background: transparent;
 }
 
-/* Gallery thumbnails: show real proportions */
-.image-gallery .draggable {
-  width: auto !important;
-  height: auto !important;
-  aspect-ratio: auto !important;
-  object-fit: contain !important;
-  border-radius: 0 !important;
-  max-width: 14vw;
-  max-height: 22vh;
-}
-@media (max-width: 1024px) {
-  .image-gallery .draggable { max-width: 22vw; max-height: 26vh; }
-}
-@media (max-width: 600px) {
-  .image-gallery .draggable { max-width: 44vw; max-height: 30vh; }
-  .image-gallery .draggable[data-category="dibujos"]:not(.folder-year) {
-    max-width: 30vw !important;
-    max-height: 22vh !important;
-  }
-}
 
-/* Hide details list inside popup */
-.obra-detalles { display: none !important; }
-
-/* Gallery container flows instead of fixed canvas */
-.gallery-container {
-  position: relative !important;
-  height: auto !important;
-  min-height: 150vh;
-  overflow: visible !important;
-  top: 0 !important;
-  bottom: auto !important;
-}
-.image-gallery {
-  position: relative !important;
-  min-height: inherit;
-  padding-top: 0;
-}
-@media (min-width: 600px) and (max-width: 1023px) {
-  .image-gallery { padding-top: 5.5rem; }
-}
-@media (min-width: 1024px) {
-  .image-gallery { padding-top: 6rem; }
-}
-
-.footer {
-  position: relative !important;
-  bottom: auto !important;
-  width: 100%;
-  z-index: 5;
-  margin-top: 2rem;
-  box-shadow: 0 -1px 4px rgba(0,0,0,0.08);
-}
-
-/* Folder thumbnails */
-.image-gallery .draggable.folder-year {
-  position: absolute !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  max-width: 8vw;
-  max-height: 12vh;
-  aspect-ratio: auto !important;
-  height: auto !important;
-  overflow: visible !important;
-}
-.folder-year .folder-icon { display: block; width: 100%; height: auto; }
-.folder-year .folder-caption {
-  text-align: center;
-  margin-top: 4px;
-  font-size: 0.85rem;
-  color: #cfcfcf;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-}
-
-/* Declarative visibility fallback */
-body.cat-copias   .image-gallery .draggable.folder-year[data-category="copias"],
-body.cat-pinturas .image-gallery .draggable.folder-year[data-category="pinturas"],
-body.cat-dibujos  .image-gallery .draggable.folder-year[data-category="dibujos"] {
-  display: block;
-}
-
-/* Folder default layout */
-#Folder2025 { left: 2%; top: 2%; }
-#Folder2024 { left: 2%; top: 10%; }
-#Folder2023 { left: 2%; top: 18%; }
-#Folder2021 { left: 2%; top: 26%; }
-#Folder2020 { left: 2%; top: 34%; }
-#PaintFolder2025 { left: 2%; top: 2%; }
-#PaintFolderPrev { left: 2%; top: 10%; }
-#DrawFolder2025 { left: 2%; top: 2%; }
-
-/* Special styling for folder 2025 icon */
-.image-gallery .draggable.folder-2025 {
-  max-width: 8vw;
-  max-height: 12vh;
-}
-@media (max-width: 1024px) {
-  .image-gallery .draggable.folder-2025 { max-width: 12vw; max-height: 16vh; }
-}
-@media (max-width: 600px) {
-  .image-gallery .draggable.folder-2025 { max-width: 20vw; max-height: 20vh; }
-}
-
-.folder-year.image-loading,
-.folder-2025.image-loading {
-  filter: none !important;
-  opacity: 1 !important;
-}
-.folder-year.image-loading::after,
-.folder-2025.image-loading::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* Tablet layout tweaks */
-@media (min-width: 600px) and (max-width: 1023px) {
-  .image-gallery .draggable.folder-year { max-width: 16vw; max-height: 16vh; }
-  .image-gallery { padding-top: calc(var(--tab-header-h, 4rem) + 0.125rem) !important; }
-  #Folder2025, #Folder2024, #Folder2023, #Folder2021, #Folder2020,
-  #PaintFolder2025, #PaintFolderPrev, #DrawFolder2025 {
-    top: calc(var(--tab-header-h, 4rem) + 0.125rem) !important;
-  }
-  #Folder2025 { left: 6% !important; }
-  #Folder2024 { left: 24% !important; }
-  #Folder2023 { left: 42% !important; }
-  #Folder2021 { left: 60% !important; }
-  #Folder2020 { left: 78% !important; }
-  #PaintFolder2025 { left: 6% !important; }
-  #PaintFolderPrev { left: 24% !important; }
-  #DrawFolder2025 { left: 6% !important; }
-}
-
-/* Desktop layout tweaks */
-@media (min-width: 1024px) {
-  :root { --desk-header-h: 4.6rem; }
-  .image-gallery { padding-top: calc(var(--desk-header-h, 4.6rem) + 0.125rem) !important; }
-  #Folder2025, #Folder2024, #Folder2023, #Folder2021, #Folder2020,
-  #PaintFolder2025, #PaintFolderPrev, #DrawFolder2025 {
-    top: calc(var(--desk-header-h, 4.6rem) + 0.125rem) !important;
-  }
-  #Folder2025 { left: 6%; top: 3.5%; }
-  #Folder2024 { left: 18%; top: 3.5%; }
-  #Folder2023 { left: 30%; top: 3.5%; }
-  #Folder2021 { left: 42%; top: 3.5%; }
-  #Folder2020 { left: 54%; top: 3.5%; }
-  #PaintFolder2025 { left: 6%; top: 3.5%; }
-  #PaintFolderPrev { left: 18%; top: 3.5%; }
-  #DrawFolder2025 { left: 6%; top: 3.5%; }
-}
-
-/* Mobile layout tweaks */
-@media (max-width: 600px) {
-  :root { --mob-header-h: 3.6rem; }
-  .image-gallery {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .6rem;
-    padding-top: .25rem !important;
-  }
-  .image-gallery .draggable.folder-year {
-    position: static !important;
-    display: flex !important;
-    flex-direction: column;
-    align-items: flex-start;
-    margin: 0 0 .4rem 4% !important;
-    width: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-    left: auto !important;
-    top: auto !important;
-  }
-  .image-gallery .draggable.folder-year > .folder-icon { width: min(28vw, 160px) !important; height: auto !important; }
-  .image-gallery .draggable.folder-year .folder-caption {
-    font-size: .9rem;
-    margin-top: .2rem;
-    color: #6b7280;
-    text-align: left;
-  }
-  #Folder2025 { order: 1; }
-  #Folder2024 { order: 2; }
-  #Folder2023 { order: 3; }
-  #Folder2021 { order: 4; }
-  #Folder2020 { order: 5; }
-  #PaintFolder2025 { order: 1; }
-  #PaintFolderPrev { order: 2; }
-  #DrawFolder2025 { order: 1; }
-  .art-caption { display: none; }
-}
-/* === End overrides === */
 
 /* 2) Asegúrate de que el título no traiga un margin excesivo */
 #aboutSection h2 {
