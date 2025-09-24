@@ -85,6 +85,38 @@ function setupLegalModals() {
     }
   });
 }
+
+function prepareGalleryLayout() {
+  const gallery = document.querySelector('.image-gallery');
+  if (!gallery || gallery.classList.contains('layout-ready')) return;
+
+  const folderGrid = document.createElement('div');
+  folderGrid.className = 'folder-grid';
+
+  const artworkGrid = document.createElement('div');
+  artworkGrid.className = 'artwork-grid';
+
+  Array.from(gallery.children).forEach(node => {
+    if (!(node instanceof HTMLElement)) return;
+    if (node.classList.contains('draggable') && node.classList.contains('folder-year')) {
+      folderGrid.appendChild(node);
+    } else {
+      artworkGrid.appendChild(node);
+    }
+  });
+
+  gallery.appendChild(folderGrid);
+  gallery.appendChild(artworkGrid);
+  gallery.classList.add('layout-ready');
+}
+
+function updateArtworkLayoutState() {
+  const visibleArtwork = Array.from(
+    document.querySelectorAll('.image-gallery .draggable:not(.folder-year)')
+  ).some(img => getComputedStyle(img).display !== 'none');
+
+  document.body.classList.toggle('artwork-visible', visibleArtwork);
+}
   // ï¿½Çªel resto de tu init para splash/galer+ï¿½a, etc.
 window.addEventListener('load', () => {
   const splash      = document.getElementById('splash');
@@ -129,49 +161,18 @@ window.addEventListener('load', () => {
 
 // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Global keys & state ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 const dataKey = 'fs_positions';
-const defaultPositions = {};
 const darkKey = 'fs_dark';
-const keyStep = 10;
-let state = { el: null, sx: 0, sy: 0, ox: 0, oy: 0 };
-function getRect() {
-  return document.querySelector('.gallery-container').getBoundingClientRect();
-}
-function save() {
-  const o = {};
-  document.querySelectorAll('.draggable').forEach(i => {
-    o[i.id] = { x: i.offsetLeft, y: i.offsetTop };
-  });
-  localStorage.setItem(dataKey, JSON.stringify(o));
-}
+function save() {}
 function load() {
-  const saved = JSON.parse(localStorage.getItem(dataKey) || '{}');
-  const galleryRect = getRect();
-
   document.querySelectorAll('.draggable').forEach(img => {
-    let x, y;
-
-    const forceDefault = img.classList.contains('folder-year') && isDesktop();
-    if (saved[img.id] != null && !forceDefault) {
-      // Si hay posici+ï¿½n guardada, +ï¿½sala
-      x = saved[img.id].x;
-      y = saved[img.id].y;
-    } else {
-      // Si no hay guardado, usa la posici+ï¿½n por defecto del CSS
-      const def = defaultPositions[img.id] || { x: 0, y: 0 };
-      x = def.x;
-      y = def.y;
+    img.style.left = '';
+    img.style.top = '';
+    if (img.style.position) {
+      img.style.position = '';
     }
-
-    // Aseguramos que no se salga del contenedor
-    const maxX = galleryRect.width  - img.offsetWidth;
-    const maxY = galleryRect.height - img.offsetHeight;
-    x = Math.min(Math.max(0, x), maxX);
-    y = Math.min(Math.max(0, y), maxY);
-
-    img.style.left = x + 'px';
-    img.style.top  = y + 'px';
   });
 }
+
 function setupLoad(i) {
   if (i.complete) return;
   i.classList.add('image-loading');
@@ -303,57 +304,6 @@ document.addEventListener('click', () => {
 
 // 1) Cachea nodos
 const galleryItems = Array.from(document.querySelectorAll('.image-gallery .draggable'));
-const desktopMedia = window.matchMedia('(min-width:1024px)');
-const isDesktop = () => desktopMedia.matches;
-const folderRowTop = 24;
-const folderRowGap = 24;
-
-function getFolderSortValue(folder) {
-  const caption = folder.querySelector('.folder-caption');
-  if (!caption) return Number.NEGATIVE_INFINITY;
-  const text = caption.textContent.trim();
-  const numeric = parseInt(text, 10);
-  if (!Number.isNaN(numeric)) return numeric;
-  return text.toLowerCase().includes('anteriores') ? -1 : Number.NEGATIVE_INFINITY;
-}
-
-function arrangeDesktopFolders(cat) {
-  if (!isDesktop() || !cat || cat === 'all') return;
-  const gallery = document.querySelector('.gallery-container');
-  if (!gallery) return;
-  const folders = Array.from(document.querySelectorAll(`.folder-year[data-category="${cat}"]`))
-    .filter(folder => getComputedStyle(folder).display !== 'none');
-  if (!folders.length) return;
-  folders.sort((a, b) => getFolderSortValue(b) - getFolderSortValue(a));
-  let currentLeft = folderRowGap;
-  folders.forEach(folder => {
-    const width = folder.getBoundingClientRect().width || folder.offsetWidth || 120;
-    const x = currentLeft;
-    const y = folderRowTop;
-    folder.style.left = `${x}px`;
-    folder.style.top = `${y}px`;
-    defaultPositions[folder.id] = { x, y };
-    currentLeft += width + folderRowGap;
-  });
-}
-
-function ensureDesktopFoldersLayout() {
-  const active = document.querySelector('.filter-btn.active');
-  const cat = active ? active.dataset.cat : 'all';
-  arrangeDesktopFolders(cat);
-}
-
-if (desktopMedia.addEventListener) {
-  desktopMedia.addEventListener('change', e => {
-    if (e.matches) ensureDesktopFoldersLayout();
-  });
-} else {
-  desktopMedia.addListener(e => {
-    if (e.matches) ensureDesktopFoldersLayout();
-  });
-}
-
-// 2) Define la funciï¿½n de filtrado
 function filterBy(cat) {
   galleryItems.forEach(img => {
     const shouldDisplay = cat !== 'all' && img.dataset.category === cat;
@@ -362,7 +312,12 @@ function filterBy(cat) {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.cat === cat);
   });
-  arrangeDesktopFolders(cat);
+  if (cat === 'all') {
+    if (typeof window.__setFolders === 'function') window.__setFolders(null);
+  } else if (typeof window.__setFolders === 'function') {
+    window.__setFolders(cat);
+  }
+  updateArtworkLayoutState();
 }
 // 0) Cachear el homeBtn m+ï¿½vil
 const homeBtnMobile = document.getElementById('homeBtn');
@@ -538,6 +493,7 @@ searchForm.addEventListener('submit', e => {
     ).toLowerCase();
     img.style.display = hayTexto.includes(q) ? '' : 'none';
   });
+  updateArtworkLayoutState();
 });
 // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FIN B+ï¿½SQUEDA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
@@ -546,11 +502,10 @@ searchForm.addEventListener('submit', e => {
   // Reset sin recargar
   resetBtn.onclick = () => {
     localStorage.removeItem(dataKey);
-    document.querySelectorAll('.draggable').forEach(img => {
-      img.style.left = '';
-      img.style.top  = '';
-    });
     load();
+    filterBy('all');
+    if (typeof window.__setFolders === 'function') window.__setFolders(null);
+    updateArtworkLayoutState();
   };
   // Dark mode persistente
   if (localStorage.getItem(darkKey) === 'true') document.body.classList.add('dark');
@@ -601,97 +556,24 @@ sendMailBtn.addEventListener('click', () => {
   });
   // ï¿½ï¿½ï¿½ CONFIGURAR IM+ï¿½GENES DRAG & POPUP ï¿½ï¿½ï¿½  
   const imgs = Array.from(document.querySelectorAll('.draggable'));
+  load();
   imgs.forEach(img => {
-      img.style.position = 'absolute';
-    });
-imgs.forEach(img => {
-  const galleryRect = getRect();              // tu funci+ï¿½n que devuelve .gallery-container.getBoundingClientRect()
-const imgRect     = img.getBoundingClientRect();
-defaultPositions[img.id] = {
-  x: imgRect.left - galleryRect.left,
-  y: imgRect.top  - galleryRect.top
-};
-});
-load();
-  let R = getRect();
-  imgs.forEach(i => {
-    setupLoad(i);
-    i.tabIndex = 0;
+    setupLoad(img);
+    img.style.left = '';
+    img.style.top = '';
+    img.style.position = '';
+    img.tabIndex = 0;
+    const isFolder = img.classList.contains('folder-year');
+    img.ondblclick = isFolder ? null : (() => showPop(img));
+    if ('ontouchstart' in window && !isFolder) {
+      img.addEventListener('click', e => {
+        e.stopPropagation();
+        showPop(img);
+      });
+    }
   });
-  window.addEventListener('resize', () => { R = getRect(); load(); });
-
-  imgs.forEach(i => {
-    i.onpointerdown = e => {
-      if (isDesktop() && i.classList.contains('folder-year')) return;
-      // S+ï¿½lo preventDefault si no es touch, para no romper el dobleï¿½ï¿½ï¿½tap en m+ï¿½vil
-      if (e.pointerType !== 'touch') {
-        e.preventDefault();
-      }
-      state.el = i;
-      state.sx = e.clientX;
-      state.sy = e.clientY;
-      state.ox = i.offsetLeft;
-      state.oy = i.offsetTop;
-      i.setPointerCapture(e.pointerId);
-    };
-    i.onpointermove = e => {
-      if (!state.el) return;
-  let x = state.ox + (e.clientX - state.sx);
-  let y = state.oy + (e.clientY - state.sy);
-
-
-  x = Math.min(Math.max(0, x), R.width  - i.offsetWidth);
-  y = Math.min(Math.max(0, y), R.height - i.offsetHeight);
-  
-    i.style.left  = `${x}px`;
-    i.style.top   = `${y}px`;
-    };
-    i.onpointerup = e => {
-      if (state.el) {
-           // Limpia transform para que no interfiera
-  state.el.style.transform = '';
-        save();
-        state.el.releasePointerCapture(e.pointerId);
-        state.el = null;
-      }
-    };
-// ï¿½ï¿½ï¿½ Tap sencillo en m+ï¿½vil para abrir popup ï¿½ï¿½ï¿½
-// 1) dejamos intacto el dblclick para escritorio (evitar en carpetas)
-const isFolder = i.classList.contains('folder-year');
-i.ondblclick = isFolder ? null : (() => showPop(i));
-
-// 2) a+ï¿½adimos click s+ï¿½lo en dispositivos t+ï¿½ctiles
-if ('ontouchstart' in window && !isFolder) {
-  i.addEventListener('click', e => {
-    e.stopPropagation();   // que no ï¿½Ç£reboteï¿½ï¿½ï¿½ el click al overlay
-    showPop(i);
-  });
-}
-
-    i.onkeydown = e => {
-      let moved = false, x = i.offsetLeft, y = i.offsetTop;
-      switch (e.key) {
-        case 'ArrowLeft':
-          x = Math.max(0, x - keyStep); moved = true; break;
-        case 'ArrowRight':
-          x = Math.min(R.width - i.offsetWidth, x + keyStep); moved = true; break;
-        case 'ArrowUp':
-          y = Math.max(0, y - keyStep); moved = true; break;
-        case 'ArrowDown':
-          y = Math.min(R.height - i.offsetHeight, y + keyStep); moved = true; break;
-        case 'Enter':
-        case ' ':
-          if (!isFolder) showPop(i); break;
-      }
-      if (moved) {
-        e.preventDefault();
-          i.style.left  = `${x}px`;
-        i.style.top   = `${y}px`;
-        save();
-      }
-    };
-  });
-
+  prepareGalleryLayout();
+  updateArtworkLayoutState();
   closePopBtn.onclick = closePop;
   pop.onclick = e => { if (e.target === pop) closePop(); };
 
@@ -765,7 +647,7 @@ popupImg.addEventListener('dblclick', () => {
     const prev=document.getElementById('PaintFolderPrev'); const y25=document.getElementById('PaintFolder2025');
     const items=[...document.querySelectorAll('.draggable[data-category="pinturas"]')].filter(el=>!el.classList.contains('folder-year'));
     if(!prev||!items.length) return;
-    const hide=()=>items.forEach(e=>e.style.display='none'); const show=()=>items.forEach(e=>{e.style.display='block';});
+    const hide = () => { items.forEach(e => e.style.display = 'none'); updateArtworkLayoutState(); }; const show = () => { items.forEach(e => { e.style.display = 'block'; }); updateArtworkLayoutState(); };
     hide(); prev.addEventListener('click',e=>{e.stopPropagation(); show();}); if(y25) y25.addEventListener('click',e=>{e.stopPropagation(); hide();});
   };
 
@@ -777,94 +659,6 @@ popupImg.addEventListener('dblclick', () => {
   });
 })();
 // === End UX Enhancements ===
-
-// === Layout + Captions (moved from index.html) ===
-(function(){
-  if (window._artLayout) return; window._artLayout = true;
-  const $ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
-
-  function ensureCaption(img){
-    if (img.classList.contains('folder-year')) return null;
-    const container = document.querySelector('.image-gallery');
-    if (!container) return null;
-    let cap = container.querySelector(`.art-caption[data-for="${img.id}"]`);
-    if (!cap){ cap = document.createElement('div'); cap.className = 'art-caption'; cap.setAttribute('data-for', img.id); container.appendChild(cap); }
-    const textFromHTML = (html) => {
-      try { return (html||'').replace(/<br\s*\/?>(\s*)/gi, '\n').replace(/<p\b[^>]*>/gi,'').replace(/<\/p>/gi,'\n\n').replace(/<[^>]*>/g,'').replace(/\n{3,}/g,'\n\n').trim(); } catch { return html||''; }
-    };
-    const title = img.getAttribute('alt') || img.id || '';
-    const desc  = textFromHTML(img.dataset.description || '');
-    const short = desc.length > 220 ? (desc.slice(0,217)+'ï¿½Çª') : desc;
-    cap.innerHTML = `<b>${title}</b>${short? '\n'+short:''}`;
-    return cap;
-  }
-
-  function layoutVisibleArtworks(){
-    const gallery = document.querySelector('.gallery-container');
-    const container = document.querySelector('.image-gallery');
-    if(!gallery||!container) return;
-    const crect = gallery.getBoundingClientRect();
-    const visible = $('.image-gallery .draggable').filter(el=>!el.classList.contains('folder-year') && getComputedStyle(el).display!=='none');
-    if(!visible.length) return;
-    const folderBottom = Math.max(0, ...$('.folder-year').filter(f=>getComputedStyle(f).display!=='none').map(f=>f.getBoundingClientRect().bottom - crect.top));
-    const padX = Math.max(12, Math.round(crect.width*0.02));
-    const baseTop = Math.max(12, Math.round(folderBottom+16));
-    const isDesktop = matchMedia('(min-width:1024px)').matches;
-    const isTablet  = matchMedia('(min-width:600px) and (max-width:1023px)').matches;
-    const cols = isDesktop?3:isTablet?2:1;
-    const gapX = isDesktop?64:isTablet?48:32;
-    const gapY = isDesktop?80:isTablet?64:48;
-    const availW = crect.width - padX*2 - gapX*(cols-1);
-    const colW = Math.max(120, Math.floor(availW/cols));
-    const colH = new Array(cols).fill(baseTop);
-    visible.sort((a,b)=>(b.offsetHeight||0)-(a.offsetHeight||0));
-    visible.forEach(el=>{
-      let col=0; for(let i=1;i<cols;i++) if(colH[i]<colH[col]) col=i;
-      el.style.width=''; el.style.height=''; if(el.offsetWidth>colW) el.style.width=colW+'px';
-      const left = padX + col*(colW+gapX); const top = colH[col];
-      el.style.left=left+'px'; el.style.top=top+'px';
-      const cap = ensureCaption(el);
-      const h = el.offsetHeight || Math.round(colW*0.75);
-      if(cap){ cap.style.display='block'; cap.style.left=left+'px'; const capGap=6; const capTop=top+h+capGap; cap.style.top=capTop+'px'; const ch = cap.getBoundingClientRect().height||18; colH[col]=capTop+ch+gapY; }
-      else { colH[col]=top+h+gapY; }
-    });
-    const maxH = Math.max(...colH);
-    container.style.minHeight = Math.max(container.offsetHeight, maxH+40)+'px';
-  }
-
-  function syncAllCaptions(){
-    const container = document.querySelector('.image-gallery'); if(!container) return;
-    $('.image-gallery .draggable').filter(i=>!i.classList.contains('folder-year')).forEach(img=>{
-      const cap = ensureCaption(img); if(!cap) return; cap.style.display = (getComputedStyle(img).display==='none')?'none':'block';
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    layoutVisibleArtworks();
-    syncAllCaptions();
-    $('.image-gallery .draggable').forEach(img=>{
-      img.addEventListener('pointermove', ()=>{ layoutVisibleArtworks(); syncAllCaptions(); });
-      img.addEventListener('pointerup',   ()=>{ layoutVisibleArtworks(); syncAllCaptions(); });
-    });
-    const reSync = ()=>{ layoutVisibleArtworks(); syncAllCaptions(); };
-    $('.filter-btn').forEach(b=>b.addEventListener('click', reSync));
-    $('.mobile-nav-btn[data-filter]').forEach(b=>b.addEventListener('click', reSync));
-    $('.sheet-filter').forEach(b=>b.addEventListener('click', reSync));
-    $('.folder-year').forEach(f=>f.addEventListener('click', reSync));
-
-    // M+ï¿½vil: tap para ver/ocultar etiqueta sin popup
-    const isMobile = ()=> matchMedia('(max-width:600px)').matches;
-    const container = document.querySelector('.image-gallery');
-    if(container){
-      container.addEventListener('click',(e)=>{
-        if(!isMobile()) return; const img=e.target.closest?.('.draggable'); if(!img||img.classList.contains('folder-year')) return; e.stopPropagation(); e.preventDefault();
-        const cap = ensureCaption(img); if(!cap) return; const visible = cap.style.display!=='none'; container.querySelectorAll('.art-caption').forEach(c=>c.style.display='none'); if(!visible){ layoutVisibleArtworks(); syncAllCaptions(); cap.style.display='block'; }
-      }, true);
-      document.addEventListener('click',()=>{ if(!isMobile()) return; container.querySelectorAll('.art-caption').forEach(c=>c.style.display='none'); });
-    }
-  });
-})();
-// === End Layout + Captions ===
 
 // === Misc small inits ===
 document.addEventListener('DOMContentLoaded', ()=>{

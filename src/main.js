@@ -1,1 +1,693 @@
-﻿// ——— Google Analytics condicional ———\nfunction loadAnalytics() {\n  if (document.getElementById('ga-script')) return;\n  const s = document.createElement('script');\n  s.id = 'ga-script';\n  s.async = true;\n  s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WW7LC8SFJ5';\n  document.head.appendChild(s);\n\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){ dataLayer.push(arguments); }\n  gtag('js', new Date());\n  gtag('config', 'G-WW7LC8SFJ5', { page_path: location.pathname });\n}\n\nfunction initCookieModal() {\n  const consent = localStorage.getItem('cookieConsent');\n  const modal   = document.getElementById('cookieModal');\n\n  if (!consent) {\n    modal.classList.remove('hidden');\n  } else if (consent === 'accepted') {\n    loadAnalytics();\n  }\n\n  document.getElementById('acceptCookies').addEventListener('click', () => {\n    localStorage.setItem('cookieConsent', 'accepted');\n    loadAnalytics();\n    modal.classList.add('hidden');\n  });\n  document.getElementById('denyCookies').addEventListener('click', () => {\n    localStorage.setItem('cookieConsent', 'denied');\n    modal.classList.add('hidden');\n  });\n  document.getElementById('cookieCloseBtn').addEventListener('click', () => {\n    localStorage.setItem('cookieConsent', 'denied');\n    modal.classList.add('hidden');\n  });\n}\nfunction setupLegalModals() {\n  document.querySelectorAll('[data-modal]').forEach(btn => {\n    btn.addEventListener('click', () => {\n      const modalId = btn.getAttribute('data-modal');\n      document.getElementById(modalId).classList.remove('hidden');\n    });\n  });\n  document.querySelectorAll('[data-close]').forEach(btn => {\n    btn.addEventListener('click', () => {\n      btn.closest('.modal').classList.add('hidden');\n    });\n  });\n}\n\n// Dentro de window.load:\nwindow.addEventListener('load', () => {\n  initCookieModal();\n  setupLegalModals();\n  // …el resto de tu init para splash/galería, etc.\n\n  const splash      = document.getElementById('splash');\n  const video       = document.getElementById('splashVideo');\n  const mainContent = document.getElementById('mainContent');\n  if (!splash || !video || !mainContent) return;\n  // >>> Forzamos atributos imprescindibles para autoplay en móvil:\n  video.autoplay = true;\n  video.muted = true;\n  video.setAttribute('playsinline', '');\n  video.setAttribute('webkit-playsinline', '');\n  video.setAttribute('preload', 'auto');\n\n  // --- Opcional: arrancar sólo cuando haya suficiente buffer ---\n  video.addEventListener('canplaythrough', () => {\n  video.play().catch(() => {\n    /* Autoplay might be blocked; ignore the error */\n  });\n});\n\n  // Cuando el vídeo termina, lanzamos la transición cruzada\n  video.addEventListener('ended', () => {\n  splash.addEventListener('transitionend', () => {\n    splash.remove();\n    mainContent.classList.add('visible');\n  }, { once: true });\n\n  // ahora ocultamos\n  splash.classList.add('hidden');\n});\n\n  // Fallback: por si 'ended' no se dispara (carga slow)\n  video.addEventListener('loadedmetadata', () => {\n    setTimeout(() => {\n      if (!splash.classList.contains('hidden')) {\n        video.pause();\n        video.dispatchEvent(new Event('ended'));\n      }\n    },5000);\n  });\n});\n\n// ——— Global keys & state ———\nconst dataKey = 'fs_positions';\nconst defaultPositions = {};\nconst darkKey = 'fs_dark';\nconst keyStep = 10;\nlet state = { el: null, sx: 0, sy: 0, ox: 0, oy: 0, lt: null };\nconst DEBUG = false;\nfunction getRect() {\n  return document.querySelector('.gallery-container').getBoundingClientRect();\n}\nfunction save() {\n  const o = {};\n  document.querySelectorAll('.draggable').forEach(i => {\n    if (i.classList.contains('folder-year')) return;\n    o[i.id] = { x: i.offsetLeft, y: i.offsetTop };\n  });\n  localStorage.setItem(dataKey, JSON.stringify(o));\n}\nfunction load() {\n  const saved = JSON.parse(localStorage.getItem(dataKey) || '{}');\n  const galleryRect = getRect();\n\n  document.querySelectorAll('.draggable').forEach(img => {\n    if (!img.id) return;\n\n    const isFolder = img.classList.contains('folder-year');\n    const savedPos = !isFolder ? saved[img.id] : null;\n    let x, y;\n\n    if (savedPos && Number.isFinite(savedPos.x) && Number.isFinite(savedPos.y)) {\n      x = savedPos.x;\n      y = savedPos.y;\n    } else {\n      const def = defaultPositions[img.id];\n      if (!def) {\n        img.style.left = '';\n        img.style.top  = '';\n        return;\n      }\n      x = def.x;\n      y = def.y;\n    }\n\n    const maxX = galleryRect.width  - img.offsetWidth;\n    const maxY = galleryRect.height - img.offsetHeight;\n    x = Math.min(Math.max(0, x), maxX);\n    y = Math.min(Math.max(0, y), maxY);\n\n    img.style.left = x + 'px';\n    img.style.top  = y + 'px';\n  });\n}\nfunction setupLoad(i) {\n  if (i.complete) return;\n  i.classList.add('image-loading');\n  i.onload  = () => i.classList.remove('image-loading');\n  i.onerror = () => {\n    i.classList.remove('image-loading');\n    i.classList.add('image-error');\n  };\n}\nfunction toggleDark() {\n  const d = document.body.classList.toggle('dark');\n  localStorage.setItem(darkKey, d);\n}\nfunction showPop(i) {\n  console.log('🔔 showPop invocado para', i.id);\n  const pop = document.getElementById('popup');\n  const imgTag = document.getElementById('popupImage');\n  const titleTag= document.getElementById('popupTitle');\n  const descTag= document.getElementById('popupDescription');\n  const detalleLista = document.getElementById('detalleLista');\n  // Comprueba si existe data-popup-src; si no, usa la miniatura (i.src)\n  const nuevaSrc = i.dataset.popupSrc || i.src;\n  imgTag.src     = nuevaSrc;\n\n  titleTag.textContent = i.alt;\n    // Permitir saltos de línea o HTML sencillo en la descripción\n  descTag.innerHTML = (i.dataset.description || '').replace(/\n/g, '<br>');\n    // 3) Limpiar la lista de detalles (para evitar duplicados de popups anteriores)\n  detalleLista.innerHTML = '';\n\n const story = i.dataset.detailStory;\n  if (story) {\n    const li = document.createElement('li');\n    li.textContent =story;\n    detalleLista.appendChild(li);\n } else {\n    const tecnica    = i.dataset.detailTecnica    || 'No disponible';\n    const medidas    = i.dataset.detailMedidas    || 'No disponible';\n    const ano        = i.dataset.detailAno        || 'No disponible';\n    const proceso    = i.dataset.detailProceso    || 'No disponible';\n    const inspiracion = i.dataset.detailInspiracion || 'No disponible';\n\n    const items = [\n      `Técnica: ${tecnica}`,\n      `Medidas: ${medidas}`,\n      `Año de ejecución: ${ano}`,\n      `Proceso creativo: ${proceso}`,\n      `Inspiración: ${inspiracion}`\n    ];\n\n    items.forEach(texto => {\n      const li = document.createElement('li');\n      li.textContent = texto;\n      detalleLista.appendChild(li);\n    });\n  }\n  pop.classList.add('active');\n}\nfunction closePop() {\n   // Si estamos en pantalla completa, salimos primero\n  if (document.fullscreenElement) {\n    document.exitFullscreen();\n  }\n  document.getElementById('popup').classList.remove('active');\n}\n\n\n// ——— Main initialization ———\n\n  document.addEventListener('DOMContentLoaded', () => {\n\n    localStorage.removeItem(dataKey);\n      // ——— Textos traducibles ———\n  const texts = {\n    // Nav / modales\n    about:           { es: 'Info',             en: 'About' },\n    contact:         { es: 'Contacto',          en: 'Contact' },\n    aboutTitle:      { es: 'Sobre Family Style',en: 'About Family Style' },\n    contactTitle:    { es: 'Envíanos un email',  en: 'Send us an email' },\n    close:           { es: 'Cerrar',            en: 'Close' },\n    aboutInfo:     { es: 'Family Style es un estudio de diseño y desarrollo web.', en: 'Family Style is a web design and development studio.' },\n    pubBtn:         { es: 'Publicaciones',    en: 'Publications' },\n    Shangay:      { es: 'Entrevista Shangay',         en: 'Shangay Interview' },\n    Telemadrid: { es: 'Entrevista Telemadrid',        en: 'Telemadrid Interview' },\n    Elbloque:   { es: 'Exposición El Bloque',          en: 'El Bloque Exhibition' },\n    // Filtros\n    filterAll:       { es: 'Antonio Monereo',  en: 'Antonio Monereo' },\n    filterCopies:    { es: 'Copias',           en: 'Copies' },\n    filterPaintings: { es: 'Pinturas',         en: 'Paintings' },\n    filterDrawings:  { es: 'Dibujos',          en: 'Drawings' },\n    // Imagenes\n    Sillamoderna: { es: 'Silla moderna',    en: 'Modern Chair' },\n  };\n\n  // Aplica un idioma a todos los data-i18n\n  function applyLang(lang) {\n    document.querySelectorAll('[data-i18n]').forEach(el => {\n      const key = el.getAttribute('data-i18n');\n      if (texts[key]) el.textContent = texts[key][lang];\n    });\n    localStorage.setItem('lang', lang);\n  }\n\n  // Inicializa al cargar\n  let lang = localStorage.getItem('lang') || 'es';\n  applyLang(lang);\n\n  // Alterna ESP/EN al pulsar\n  document.getElementById('langToggle')\n    .addEventListener('click', () => {\n      lang = (lang === 'es' ? 'en' : 'es');\n      applyLang(lang);\n    });\n    // — Toggle del menú de Publicaciones —\nconst pubBtn  = document.getElementById('pubBtn');\nconst pubMenu = document.getElementById('pubMenu');\nconst bottomSheet = document.getElementById('bottomSheet');\n\nconst initFolderVisibility = () => {\n  const folders = Array.from(document.querySelectorAll('.folder-year'));\n  if (!folders.length) return;\n  const validCats = new Set(['copias', 'pinturas', 'dibujos']);\n  const bodyClasses = ['cat-copias', 'cat-pinturas', 'cat-dibujos'];\n\n  const apply = (cat) => {\n    const normalized = (!window.__forceNoCat && cat && validCats.has(cat)) ? cat : null;\n    window.__currentCat = normalized;\n    document.body.classList.remove(...bodyClasses);\n    folders.forEach(el => {\n      const match = normalized && el.getAttribute('data-category') === normalized;\n      el.style.display = match ? 'block' : 'none';\n    });\n    if (normalized) document.body.classList.add('cat-' + normalized);\n  };\n\n  window.__forceNoCat = false;\n  window.__currentCat = null;\n  folders.forEach(el => { el.style.display = 'none'; });\n\n  window.__setFolders = (cat) => apply(cat);\n\n  const schedule = (cat) => {\n    const normalized = (cat && validCats.has(cat)) ? cat : null;\n    window.__forceNoCat = !normalized;\n    setTimeout(() => apply(normalized), 0);\n  };\n  const reset = () => {\n    window.__forceNoCat = true;\n    setTimeout(() => apply(null), 0);\n  };\n\n  const hook = (btn, getCat) => btn.addEventListener('click', () => schedule(getCat(btn)));\n\n  document.querySelectorAll('.filter-btn').forEach(btn => hook(btn, el => el.dataset.cat));\n  document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => hook(btn, el => el.getAttribute('data-filter')));\n  document.querySelectorAll('.sheet-filter').forEach(btn => hook(btn, el => el.dataset.cat));\n\n  const homeBtn = document.getElementById('homeBtn');\n  if (homeBtn) homeBtn.addEventListener('click', reset);\n\n  const active = document.querySelector('.filter-btn.active');\n  apply(validCats.has(active?.dataset.cat) ? active.dataset.cat : null);\n};\n\nconst initFolderDefaults = () => {\n  const idMap = { copias:'Folder2025', pinturas:'PaintFolder2025', dibujos:'DrawFolder2025' };\n  const triggerDefault = (cat) => {\n    if (!cat || !(cat in idMap)) return;\n    const target = document.getElementById(idMap[cat]);\n    if (!target) return;\n    setTimeout(() => target.dispatchEvent(new MouseEvent('click', { bubbles: true })), 0);\n  };\n  const active = document.querySelector('.filter-btn.active');\n  if (active) triggerDefault(active.dataset.cat);\n  document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => triggerDefault(btn.dataset.cat)));\n  document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => btn.addEventListener('click', () => triggerDefault(btn.getAttribute('data-filter'))));\n  document.querySelectorAll('.sheet-filter').forEach(btn => btn.addEventListener('click', () => triggerDefault(btn.dataset.cat)));\n\n  const CLOSED='dist/images/aqua-icons/Aqua  Folder.ico', OPEN='dist/images/aqua-icons/Aqua Favorites.ico';\n  const folders = Array.from(document.querySelectorAll('.folder-year'));\n  const setOpen = (folder) => {\n    const cat = folder.getAttribute('data-category');\n    folders.forEach(f => {\n      if (f.getAttribute('data-category') === cat) {\n        f.classList.remove('open');\n        const icon = f.querySelector('.folder-icon');\n        if (icon) icon.src = CLOSED;\n      }\n    });\n    folder.classList.add('open');\n    const icon = folder.querySelector('.folder-icon');\n    if (icon) icon.src = OPEN;\n  };\n  folders.forEach(f => f.addEventListener('click', e => { e.stopPropagation(); setOpen(f); }));\n};\n\nconst initCopiasFolders = () => {\n  const hideIds = (ids) => ids.forEach(id => {\n    const el = document.getElementById(id);\n    if (el) el.style.display = 'none';\n  });\n  const showId = (id) => {\n    const el = document.getElementById(id);\n    if (el) el.style.display = 'block';\n  };\n  hideIds(['Velazquez', 'Gijon']);\n  const folder2021 = document.getElementById('Folder2021');\n  const folder2023 = document.getElementById('Folder2023');\n  if (folder2021) folder2021.addEventListener('click', () => {\n    showId('Velazquez');\n    hideIds(['Gijon']);\n  });\n  if (folder2023) folder2023.addEventListener('click', () => {\n    showId('Gijon');\n    hideIds(['Velazquez']);\n  });\n  document.querySelectorAll('.folder-year[data-category="copias"]').forEach(folder => {\n    if (!folder || ['Folder2021','Folder2023'].includes(folder.id)) return;\n    folder.addEventListener('click', () => hideIds(['Velazquez', 'Gijon']));\n  });\n};\n\nconst initPinturasPrev = () => {\n  const prev = document.getElementById('PaintFolderPrev');\n  const y25  = document.getElementById('PaintFolder2025');\n  const items = Array.from(document.querySelectorAll('.draggable[data-category="pinturas"]')).filter(el => !el.classList.contains('folder-year'));\n  if (!prev || !items.length) return;\n  const hide = () => items.forEach(el => el.style.display = 'none');\n  const show = () => items.forEach(el => { el.style.display = 'block'; });\n  hide();\n  prev.addEventListener('click', e => { e.stopPropagation(); show(); });\n  if (y25) y25.addEventListener('click', e => { e.stopPropagation(); hide(); });\n};\n  initFolderVisibility();\n  initFolderDefaults();\n  initCopiasFolders();\n  initPinturasPrev();\n\n// Al hacer clic, alternar la clase "open" en el contenedor .dropdown\npubBtn.addEventListener('click', e => {\n  e.stopPropagation();             // evita cerrar al hacer clic en el botón\n  pubBtn.parentElement.classList.toggle('open');\n});\n\n// Si haces clic fuera, cierra el menú\ndocument.addEventListener('click', () => {\n  pubBtn.parentElement.classList.remove('open');\n  });\n\n// 1) Cachea nodos\nconst galleryItems = Array.from(document.querySelectorAll('.image-gallery .draggable')).filter(img => !img.classList.contains('folder-year'));\n// 2) Define la función de filtrado\nfunction filterBy(cat) {\n  if (cat === 'all') {\n    galleryItems.forEach(img => { img.style.display = 'none'; });\n  } else {\n    galleryItems.forEach(img => {\n      img.style.display = (img.dataset.category === cat) ? '' : 'none';\n    });\n  }\n  document.querySelectorAll('.filter-btn').forEach(btn => {\n    btn.classList.toggle('active', btn.dataset.cat === cat);\n  });\n  if (cat === 'all') {\n    window.__forceNoCat = true;\n    if (typeof window.__setFolders === 'function') window.__setFolders(null);\n  } else {\n    window.__forceNoCat = false;\n    if (typeof window.__setFolders === 'function') window.__setFolders(cat);\n}\n  }\n\n// 0) Cachear el homeBtn móvil\nconst homeBtnMobile = document.getElementById('homeBtn');\n\n// 1) Al clicar en móvil sobre "Antonio Monereo"\nhomeBtnMobile.addEventListener('click', e => {\n  e.preventDefault();\n  // a) Resetear filtros igual que si clicases "all"\n  filterBy('all');\n  // b) Cerrar menú lateral si estuviera abierto\n  document.body.classList.remove('menu-open');\n  // c) Si usas bottomSheet para filtros, ciérralo también\n  if (typeof bottomSheet !== 'undefined') {\n    if (bottomSheet) bottomSheet.classList.remove('open');\n  }\n});\n\n// 3) Asocia los listeners\ndocument.querySelectorAll('.filter-btn').forEach(btn => {\n  btn.addEventListener('click', () => {\n    const cat = btn.dataset.cat;    // 'all' | 'copias' | 'pinturas' | 'dibujos'\n    filterBy(cat);\n    if (bottomSheet) bottomSheet.classList.remove('open');  // cierra el panel en móvil si está abierto\n  });\n});\n// 4) Aplica estado inicial\nfilterBy('all');\n  \n  // — ACCIONES DE NAVEGACIÓN —  \n  document.querySelectorAll('.sheet-nav').forEach(btn => {\n    btn.addEventListener('click', () => {\n      switch (btn.dataset.action) {\n        case 'about':   document.getElementById('aboutBtn').click();     break;\n        case 'contact': document.getElementById('contactBtn').click();    break;\n        case 'dark':    document.getElementById('darkModeToggle').click();break;\n        case 'reset':   document.getElementById('resetBtn').click();      break;\n      }\n      if (bottomSheet) bottomSheet.classList.remove('open');\n    });\n  });\n\n  // — RESET, DARK, ABOUT, CONTACT —  \n  const resetBtn   = document.getElementById('resetBtn');\n  const darkBtn    = document.getElementById('darkModeToggle');\n  const aboutBtn  = document.getElementById('aboutBtn');\n  const aboutSec   = document.getElementById('aboutSection');\n  const closeAbout = document.getElementById('closeAbout');\n  const pop        = document.getElementById('popup');\n  const closePopBtn= document.getElementById('closePopup');\n// — HEADER MÓVIL: hamburguesa, home y lupa —\n\n// 1) Menú hamburguesa (tú lo usarás para mostrar tu nav lateral)\nconst hamburgerBtn = document.getElementById('hamburgerBtn');\nconst mobileNav     = document.getElementById('mobileNav');\nhamburgerBtn.addEventListener('click', () => {\n  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';\n  hamburgerBtn.setAttribute('aria-expanded', String(!isExpanded));\n  mobileNav.hidden = isExpanded;\n  document.body.classList.toggle('menu-open', !isExpanded);\n  // Opcional: mueve el foco al primer ítem del menú\n  if (!isExpanded) {\n    mobileNav.querySelector('[role="menuitem"]')?.focus();\n  }\n  hamburgerBtn.setAttribute(\n  'aria-label',\n  !isExpanded ? 'Cerrar menú' : 'Abrir menú'\n);\nhamburgerBtn.focus();\n});\n// ——— Cerrar menú al hacer click en un ítem ———\nconst menuItems = mobileNav.querySelectorAll('[role="menuitem"]');\nmenuItems.forEach(item => {\n  item.addEventListener('click', () => {\n    // 1) Cerrar el nav\n    mobileNav.hidden = true;\n    // 2) Actualizar ARIA en el botón\n    hamburgerBtn.setAttribute('aria-expanded', 'false');\n    hamburgerBtn.setAttribute('aria-label', 'Abrir menú');\n    // 3) Quitar clase de estilos abiertos (si la usas)\n    document.body.classList.remove('menu-open');\n    // 4) (Opcional) devolver foco al contenido principal  \n    document.getElementById('gallery')?.focus();\n  });\n});\n\n// 1) Filtros: reutiliza tu función `filterGallery`\ndocument.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => {\n  btn.addEventListener('click', () => {\n    const filt = btn.getAttribute('data-filter');\n    filterBy(filt);            // ← usa la función existente\n    document.body.classList.remove('menu-open');\n  });\n});\ndocument.addEventListener('keydown', e => {\n  if (e.key === 'Escape' && hamburgerBtn.getAttribute('aria-expanded') === 'true') {\n    hamburgerBtn.click();  // reutiliza tu propio toggle\n  }\n});\n// 2) Info (About) y Contact\nconst aboutNav = document.getElementById('aboutNav');\nif (aboutNav) {\n  aboutNav.addEventListener('click', () => {\n    const aboutBtnTarget = document.getElementById('aboutBtn');\n    if (aboutBtnTarget) aboutBtnTarget.click();\n    document.body.classList.remove('menu-open');\n  });\n}\nconst contactNav = document.getElementById('contactNav');\nconst contactBtnTrigger = document.getElementById('contactBtn');\nif (contactNav) {\n  contactNav.addEventListener('click', () => {\n    if (contactBtnTrigger) contactBtnTrigger.click();\n    document.body.classList.remove('menu-open');\n  });\n}\n// — Toggle del submenú “Publicaciones” —\nconst pubNavBtn = document.getElementById('pubNav');\nconst pubNavLi  = pubNavBtn.parentElement;  // <li class="has-submenu">\npubNavBtn.addEventListener('click', e => {\n  e.stopPropagation();\n  const isOpen = pubNavBtn.getAttribute('aria-expanded') === 'true';\n  pubNavBtn.setAttribute('aria-expanded', String(!isOpen));\n  pubNavLi.classList.toggle('open');\n\n});\n\n// Cerrar submenú si clicas fuera del mismo\ndocument.addEventListener('click', () => {\n  if (pubNavLi.classList.contains('open')) {\n    pubNavBtn.setAttribute('aria-expanded', 'false');\n    pubNavLi.classList.remove('open');\n  }\n});\n\n\n// 2) Botón Home (scroll al inicio)\nconst homeBtn = document.getElementById('homeBtn');\nhomeBtn.addEventListener('click', () => {\n  window.scrollTo({ top: 0, behavior: 'smooth' });\n});\n\n // ——— BÚSQUEDA SOBRE LA GALERÍA ———\n const searchBtns      = [\n  document.getElementById('searchBtnMobile'),\n  document.getElementById('searchBtnDesktop')\n].filter(Boolean);\n\nconst searchContainer = document.getElementById('searchContainer');\nconst searchForm      = document.getElementById('searchForm');\nconst searchInput     = document.getElementById('searchInput');\nconst thumbnails      = Array.from(document.querySelectorAll('.draggable'));\n\n// 1) Engancha el mismo handler a cada botón de búsqueda\nsearchBtns.forEach(btn => {\n    btn.addEventListener('click', e => {\n      e.stopPropagation();\n      searchContainer.classList.toggle('hidden');\n      if (!searchContainer.classList.contains('hidden')) {\n        searchInput.focus();\n      }\n    });\n  });\n\n// 2) Cerrar la barra si clicas fuera de ella O de cualquiera de los botones\ndocument.addEventListener('click', e => {\n    const clickedBtn = searchBtns.some(btn => btn === e.target);\n    if (!searchContainer.contains(e.target) && !clickedBtn) {\n      searchContainer.classList.add('hidden');\n    }\n});\n\n// 3) Filtrar miniaturas al enviar\nsearchForm.addEventListener('submit', e => {\n  e.preventDefault();\n  const q = searchInput.value.trim().toLowerCase();\n  thumbnails.forEach(img => {\n    const hayTexto = (\n      img.id + ' ' +\n      img.alt + ' ' +\n      (img.dataset.description || '')\n    ).toLowerCase();\n    img.style.display = hayTexto.includes(q) ? '' : 'none';\n  });\n});\n// ——— FIN BÚSQUEDA ———\n\n\n\n  // Reset sin recargar\n  resetBtn.onclick = () => {\n    localStorage.removeItem(dataKey);\n    document.querySelectorAll('.draggable').forEach(img => {\n      img.style.left = '';\n      img.style.top  = '';\n    });\n    load();\n  };\n  // Dark mode persistente\n  if (localStorage.getItem(darkKey) === 'true') document.body.classList.add('dark');\n  darkBtn.onclick = toggleDark;\n  // Modal About\n  if (aboutBtn && aboutSec && closeAbout) {\n    aboutBtn.addEventListener('click', e => {\n      e.preventDefault();\n      aboutSec.classList.remove('hidden');\n      aboutBtn.setAttribute('aria-expanded', 'true');\n      aboutSec.setAttribute('aria-hidden', 'false');\n      closeAbout.focus();\n    });\n\n    closeAbout.onclick = () => aboutSec.classList.add('hidden');\n  }\n\n\n // —— Modal Contact ——\n   // 1) Captura correctamente todos los nodos que vas a usar\n   const contactSec     = document.getElementById('contactSection');\n   const closeContact   = document.getElementById('closeContact');\n   const contactBtn     = document.getElementById('contactBtn');\n\nif (contactSec && closeContact && contactBtn) {\n  const sendMailBtn = document.getElementById('sendMailBtn');\n\n  contactBtn.addEventListener('click', () => {\n    contactSec.classList.remove('hidden');\n    contactBtn.setAttribute('aria-expanded', 'true');\n    const focusTarget = sendMailBtn || closeContact;\n    if (focusTarget && typeof focusTarget.focus === 'function') {\n      focusTarget.focus();\n    }\n  });\n\n  closeContact.addEventListener('click', () => {\n    contactSec.classList.add('hidden');\n    contactBtn.setAttribute('aria-expanded', 'false');\n    contactBtn.focus();\n  });\n\n  if (sendMailBtn) {\n    sendMailBtn.addEventListener('click', () => {\n      // reemplaza con los correos destino, separados por comas si son varios\n      window.location.href = 'mailto:antoniomonelopez@gmail.com';\n    });\n  }\n\n  document.addEventListener('keydown', e => {\n    if (e.key === 'Escape' && !contactSec.classList.contains('hidden')) {\n      closeContact.click();\n    }\n  });\n}\n\n  // — CONFIGURAR IMÁGENES DRAG & POPUP —  \n  const imgs = Array.from(document.querySelectorAll('.draggable'));\n  imgs.forEach(img => {\n    img.style.position = 'absolute';\n  });\n  imgs.forEach(img => {\n    if (!img.id) return;\n\n    const galleryRect = getRect();\n    const computed = getComputedStyle(img);\n    const wasHidden = computed.display === 'none';\n    const previousDisplay = img.style.display;\n    if (wasHidden) {\n      img.style.display = '';\n      if (getComputedStyle(img).display === 'none') {\n        img.style.display = 'block';\n      }\n    }\n\n    const imgRect = img.getBoundingClientRect();\n    if (wasHidden) {\n      img.style.display = previousDisplay;\n    }\n    if (!imgRect.width && !imgRect.height) return;\n\n    defaultPositions[img.id] = {\n      x: imgRect.left - galleryRect.left,\n      y: imgRect.top  - galleryRect.top\n    };\n  });\nload();\n  let R = getRect();\n  imgs.forEach(i => {\n    setupLoad(i);\n    i.tabIndex = 0;\n  });\n  window.addEventListener('resize', () => { R = getRect(); load(); });\n\n  imgs.forEach(i => {\n    i.onpointerdown = e => {\n      // Sólo preventDefault si no es touch, para no romper el doble‐tap en móvil\n      if (e.pointerType !== 'touch') {\n        e.preventDefault();\n      }\n      state.el = i;\n      state.sx = e.clientX;\n      state.sy = e.clientY;\n      state.ox = i.offsetLeft;\n      state.oy = i.offsetTop;\n      i.setPointerCapture(e.pointerId);\n    };\n    i.onpointermove = e => {\n      if (!state.el) return;\n  let x = state.ox + (e.clientX - state.sx);\n  let y = state.oy + (e.clientY - state.sy);\n\n  console.log(`Moviendo: ${i.id}, X: ${x}, Y: ${y}, R.width: ${R.width}, R.height: ${R.height}`);\n\n  x = Math.min(Math.max(0, x), R.width  - i.offsetWidth);\n  y = Math.min(Math.max(0, y), R.height - i.offsetHeight);\n  \n    i.style.left  = `${x}px`;\n    i.style.top   = `${y}px`;\n    };\n    i.onpointerup = e => {\n      if (state.el) {\n           // Limpia transform para que no interfiera\n  state.el.style.transform = '';\n        save();\n        state.el.releasePointerCapture(e.pointerId);\n        state.el = null;\n      }\n    };\n// — Tap sencillo en móvil para abrir popup —\n// 1) dejamos intacto el dblclick para escritorio\ni.ondblclick = () => showPop(i);\n\n// 2) añadimos click sólo en dispositivos táctiles\nif ('ontouchstart' in window) {\n  i.addEventListener('click', e => {\n    e.stopPropagation();   // que no “rebote” el click al overlay\n    showPop(i);\n  });\n}\n\n    i.onkeydown = e => {\n      let moved = false, x = i.offsetLeft, y = i.offsetTop;\n      switch (e.key) {\n        case 'ArrowLeft':\n          x = Math.max(0, x - keyStep); moved = true; break;\n        case 'ArrowRight':\n          x = Math.min(R.width - i.offsetWidth, x + keyStep); moved = true; break;\n        case 'ArrowUp':\n          y = Math.max(0, y - keyStep); moved = true; break;\n        case 'ArrowDown':\n          y = Math.min(R.height - i.offsetHeight, y + keyStep); moved = true; break;\n        case 'Enter':\n        case ' ':\n          showPop(i); break;\n      }\n      if (moved) {\n        e.preventDefault();\n          i.style.left  = `${x}px`;\n        i.style.top   = `${y}px`;\n        save();\n      }\n    };\n  });\n\n  closePopBtn.onclick = closePop;\n  pop.onclick = e => { if (e.target === pop) closePop(); };\n\n  // Dinámico\n  document.getElementById('currentYear').textContent = new Date().getFullYear();\n  \n// --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------\n\n// 1) Referencia al <img> del popup\nconst popupImg = document.getElementById('popupImage');\n\n// 2) Listener de doble clic en escritorio\npopupImg.addEventListener('dblclick', () => {\n  if (!document.fullscreenElement) {\n    popupImg.requestFullscreen().catch(err => {\n      console.error(`Error al pedir fullscreen: ${err.message}`);\n    });\n  } else {\n    document.exitFullscreen();\n  }\n});\n\n// 3) Listener de “double-tap” en móvil (touchend)\nlet lastTap = 0;\npopupImg.addEventListener('touchend', e => {\n  const currentTime = new Date().getTime();\n  const tapLength   = currentTime - lastTap;\n  if (tapLength < 300 && tapLength > 0) {\n    // Double-tap detectado: toggle fullscreen\n    if (!document.fullscreenElement) {\n      popupImg.requestFullscreen().catch(err => {\n        console.error(`Error al pedir fullscreen: ${err.message}`);\n      });\n    } else {\n      document.exitFullscreen();\n    }\n  }\n  lastTap = currentTime;\n});\n});\n\n\n\n\n\n
+﻿// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Google Analytics condicional ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+function loadAnalytics() {
+  if (document.getElementById('ga-script')) return;
+  const s = document.createElement('script');
+  s.id = 'ga-script';
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WW7LC8SFJ5';
+  document.head.appendChild(s);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-WW7LC8SFJ5', { page_path: location.pathname });
+}
+
+function initCookieModal() {
+  const consent = localStorage.getItem('cookieConsent');
+  const modal   = document.getElementById('cookieModal');
+
+  if (!consent) {
+    modal.classList.remove('hidden');
+  } else if (consent === 'accepted') {
+    loadAnalytics();
+  }
+
+  document.getElementById('acceptCookies').addEventListener('click', () => {
+    localStorage.setItem('cookieConsent', 'accepted');
+    loadAnalytics();
+    modal.classList.add('hidden');
+  });
+  document.getElementById('denyCookies').addEventListener('click', () => {
+    localStorage.setItem('cookieConsent', 'denied');
+    modal.classList.add('hidden');
+  });
+  document.getElementById('cookieCloseBtn').addEventListener('click', () => {
+    localStorage.setItem('cookieConsent', 'denied');
+    modal.classList.add('hidden');
+  });
+}
+function setupLegalModals() {
+  // Abrir modales
+  document.querySelectorAll('[data-modal]').forEach(trigger => {
+    const modalId = trigger.getAttribute('data-modal');
+    const modal = document.getElementById(modalId);
+    const closeBtn = modal.querySelector('[data-close]');
+    trigger.addEventListener('click', event => {
+      event.preventDefault();
+      // Mostrar
+      modal.classList.remove('hidden');
+      modal.classList.add('active');
+      // Aria
+      trigger.setAttribute('aria-expanded', 'true');
+      // Focus en el bot+ï¿½n de cerrar
+      closeBtn.focus();
+    });
+  });
+
+  // Cerrar modales
+  document.querySelectorAll('[data-close]').forEach(closeBtn => {
+    const modal = closeBtn.closest('.modal');
+    const triggerId = modal.id && document.querySelector(`[data-modal="${modal.id}"]`);
+    closeBtn.addEventListener('click', () => {
+      // Ocultar
+      modal.classList.remove('active');
+      modal.classList.add('hidden');
+      // Aria
+      if (triggerId) triggerId.setAttribute('aria-expanded', 'false');
+      // Devolver foco al disparador
+      triggerId && triggerId.focus();
+    });
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.active').forEach(modal => {
+        modal.classList.remove('active');
+        modal.classList.add('hidden');
+        const trigger = document.querySelector(`[data-modal="${modal.id}"]`);
+        if (trigger) {
+          trigger.setAttribute('aria-expanded', 'false');
+          trigger.focus();
+        }
+      });
+    }
+  });
+}
+
+function prepareGalleryLayout() {
+  const gallery = document.querySelector('.image-gallery');
+  if (!gallery || gallery.classList.contains('layout-ready')) return;
+
+  const folderGrid = document.createElement('div');
+  folderGrid.className = 'folder-grid';
+
+  const artworkGrid = document.createElement('div');
+  artworkGrid.className = 'artwork-grid';
+
+  Array.from(gallery.children).forEach(node => {
+    if (!(node instanceof HTMLElement)) return;
+    if (node.classList.contains('draggable') && node.classList.contains('folder-year')) {
+      folderGrid.appendChild(node);
+    } else {
+      artworkGrid.appendChild(node);
+    }
+  });
+
+  gallery.appendChild(folderGrid);
+  gallery.appendChild(artworkGrid);
+  gallery.classList.add('layout-ready');
+}
+
+function updateArtworkLayoutState() {
+  const visibleArtwork = Array.from(
+    document.querySelectorAll('.image-gallery .draggable:not(.folder-year)')
+  ).some(img => getComputedStyle(img).display !== 'none');
+
+  document.body.classList.toggle('artwork-visible', visibleArtwork);
+}
+  // ï¿½Çªel resto de tu init para splash/galer+ï¿½a, etc.
+window.addEventListener('load', () => {
+  const splash      = document.getElementById('splash');
+  const video       = document.getElementById('splashVideo');
+  const mainContent = document.getElementById('mainContent');
+  if (!splash || !video || !mainContent) return;
+  // >>> Forzamos atributos imprescindibles para autoplay en m+ï¿½vil:
+  video.autoplay = true;
+  video.muted = true;
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+  video.setAttribute('preload', 'auto');
+
+  // --- Opcional: arrancar s+ï¿½lo cuando haya suficiente buffer ---
+  video.addEventListener('canplaythrough', () => {
+  video.play().catch(() => {
+    /* Autoplay might be blocked; ignore the error */
+  });
+});
+
+  // Cuando el v+ï¿½deo termina, lanzamos la transici+ï¿½n cruzada
+  video.addEventListener('ended', () => {
+  splash.addEventListener('transitionend', () => {
+    splash.remove();
+    mainContent.classList.add('visible');
+  }, { once: true });
+
+  // ahora ocultamos
+  splash.classList.add('hidden');
+});
+
+  // Fallback: por si 'ended' no se dispara (carga slow)
+  video.addEventListener('loadedmetadata', () => {
+    setTimeout(() => {
+      if (!splash.classList.contains('hidden')) {
+        video.pause();
+        video.dispatchEvent(new Event('ended'));
+      }
+    },5000);
+  });
+});
+
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Global keys & state ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+const dataKey = 'fs_positions';
+const darkKey = 'fs_dark';
+function save() {}
+function load() {
+  document.querySelectorAll('.draggable').forEach(img => {
+    img.style.left = '';
+    img.style.top = '';
+    if (img.style.position) {
+      img.style.position = '';
+    }
+  });
+}
+
+function setupLoad(i) {
+  if (i.complete) return;
+  i.classList.add('image-loading');
+  i.onload  = () => i.classList.remove('image-loading');
+  i.onerror = () => {
+    i.classList.remove('image-loading');
+    i.classList.add('image-error');
+  };
+}
+function toggleDark() {
+  const d = document.body.classList.toggle('dark');
+  localStorage.setItem(darkKey, d);
+}
+function showPop(i) {
+  const pop = document.getElementById('popup');
+  const imgTag = document.getElementById('popupImage');
+  const titleTag= document.getElementById('popupTitle');
+  const descTag= document.getElementById('popupDescription');
+  const detalleLista = document.getElementById('detalleLista');
+  // Comprueba si existe data-popup-src; si no, usa la miniatura (i.src)
+  const nuevaSrc = i.dataset.popupSrc || i.src;
+  imgTag.src     = nuevaSrc;
+
+  titleTag.textContent = i.alt;
+    // Permitir saltos de l+ï¿½nea o HTML sencillo en la descripci+ï¿½n
+  descTag.innerHTML = (i.dataset.description || '').replace(/\n/g, '<br>');
+    // 3) Limpiar la lista de detalles (para evitar duplicados de popups anteriores)
+  detalleLista.innerHTML = '';
+
+ const story = i.dataset.detailStory;
+  if (story) {
+    const li = document.createElement('li');
+    li.textContent =story;
+    detalleLista.appendChild(li);
+ } else {
+    const tecnica    = i.dataset.detailTecnica    || 'No disponible';
+    const medidas    = i.dataset.detailMedidas    || 'No disponible';
+    const ano        = i.dataset.detailAno        || 'No disponible';
+    const proceso    = i.dataset.detailProceso    || 'No disponible';
+    const inspiracion = i.dataset.detailInspiracion || 'No disponible';
+
+    const items = [
+      `T+ï¿½cnica: ${tecnica}`,
+      `Medidas: ${medidas}`,
+      `A+ï¿½o de ejecuci+ï¿½n: ${ano}`,
+      `Proceso creativo: ${proceso}`,
+      `Inspiraci+ï¿½n: ${inspiracion}`
+    ];
+
+    items.forEach(texto => {
+      const li = document.createElement('li');
+      li.textContent = texto;
+      detalleLista.appendChild(li);
+    });
+  }
+  pop.classList.add('active');
+}
+function closePop() {
+   // Si estamos en pantalla completa, salimos primero
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+  document.getElementById('popup').classList.remove('active');
+}
+
+
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Main initialization ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+  document.addEventListener('DOMContentLoaded', () => {
+  initCookieModal();
+   setupLegalModals();
+
+      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Textos traducibles ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  const texts = {
+    // Nav / modales
+    about:           { es: 'Info',             en: 'About' },
+    contact:         { es: 'Contacto',          en: 'Contact' },
+    aboutTitle:      { es: 'Sobre Antonio Monereo',en: 'About Antonio Monereo' },
+    contactTitle:    { es: 'Env+ï¿½anos un email',  en: 'Send us an email' },
+    close:           { es: 'Cerrar',            en: 'Close' },
+    aboutInfo:     { es: 'Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentr+ï¿½ muy pronto en el mundo del arte: comenz+ï¿½ a dibujar desde ni+ï¿½o, gan+ï¿½ un primer premio en el certamen "Toledo desde el Alc+ï¿½zar" (2016) y desde 2019 ejerce como uno de los copistas m+ï¿½s j+ï¿½venes del Museo del Prado. Su acercamiento al arte es profundamente cl+ï¿½sico, con una destacada t+ï¿½cnica acad+ï¿½mica, pero tambi+ï¿½n muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.',
+       en: 'Antonio Monereo (Madrid, 2001) is a young painter and draftsman who studied Fine Arts at the Complutense University and Art History at the UNED. He discovered his passion for art early on, began drawing as a child, won first prize in the "Toledo from the Alc+ï¿½zar" contest in 2016, and has been one of the youngest official copyists at the Prado Museum since 2019. His approach to art is deeply classical, with a strong academic technique, yet also deeply personal: in interviews, he has shared that painting has been both a refuge and a way to affirm his identity and find his place in the world.' },
+    pubBtn:         { es: 'Publicaciones',    en: 'Publications' },
+    Shangay:      { es: 'Entrevista Shangay',         en: 'Shangay Interview' },
+    Telemadrid: { es: 'Entrevista Telemadrid',        en: 'Telemadrid Interview' },
+    // Filtros
+    filterAll:       { es: 'Antonio Monereo',  en: 'Antonio Monereo' },
+    filterCopies:    { es: 'Copias',           en: 'Copies' },
+    filterPaintings: { es: 'Pinturas',         en: 'Paintings' },
+    filterDrawings:  { es: 'Dibujos',          en: 'Drawings' },
+    // Imagenes
+    Sillamoderna: { es: 'Silla moderna',    en: 'Modern Chair' },
+  };
+
+  // Aplica un idioma a todos los data-i18n
+  function applyLang(lang) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (texts[key]) el.textContent = texts[key][lang];
+    });
+    localStorage.setItem('lang', lang);
+  }
+
+  // Inicializa al cargar
+  let lang = localStorage.getItem('lang') || 'es';
+  applyLang(lang);
+
+  // Alterna ESP/EN al pulsar
+  document.getElementById('langToggle')
+    .addEventListener('click', () => {
+      lang = (lang === 'es' ? 'en' : 'es');
+      applyLang(lang);
+    });
+    // ï¿½ï¿½ï¿½ Toggle del men+ï¿½ de Publicaciones ï¿½ï¿½ï¿½
+const pubBtn  = document.getElementById('pubBtn');
+const pubMenu = document.getElementById('pubMenu');
+const bottomSheet = document.getElementById('bottomSheet');
+
+// Al hacer clic, alternar la clase "open" en el contenedor .dropdown
+pubBtn.addEventListener('click', e => {
+  e.stopPropagation();             // evita cerrar al hacer clic en el bot+ï¿½n
+  pubBtn.parentElement.classList.toggle('open');
+});
+
+// Si haces clic fuera, cierra el men+ï¿½
+document.addEventListener('click', () => {
+  pubBtn.parentElement.classList.remove('open');
+  });
+
+// 1) Cachea nodos
+const galleryItems = Array.from(document.querySelectorAll('.image-gallery .draggable'));
+function filterBy(cat) {
+  galleryItems.forEach(img => {
+    const shouldDisplay = cat !== 'all' && img.dataset.category === cat;
+    img.style.display = shouldDisplay ? '' : 'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === cat);
+  });
+  if (cat === 'all') {
+    if (typeof window.__setFolders === 'function') window.__setFolders(null);
+  } else if (typeof window.__setFolders === 'function') {
+    window.__setFolders(cat);
+  }
+  updateArtworkLayoutState();
+}
+// 0) Cachear el homeBtn m+ï¿½vil
+const homeBtnMobile = document.getElementById('homeBtn');
+
+// 1) Al clicar en m+ï¿½vil sobre "Antonio Monereo"
+homeBtnMobile.addEventListener('click', e => {
+  e.preventDefault();
+  // a) Resetear filtros igual que si clicases "all"
+  filterBy('all');
+  // b) Cerrar men+ï¿½ lateral si estuviera abierto
+  document.body.classList.remove('menu-open');
+  // c) Si usas bottomSheet para filtros, ci+ï¿½rralo tambi+ï¿½n
+  if (typeof bottomSheet !== 'undefined') {
+    bottomSheet.classList.remove('open');
+  }
+});
+
+// 3) Asocia los listeners
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cat = btn.dataset.cat;    // 'all' | 'copias' | 'pinturas' | 'dibujos'
+    filterBy(cat);
+    bottomSheet.classList.remove('open');  // cierra el panel en m+ï¿½vil si est+ï¿½ abierto
+  });
+});
+// 4) Aplica estado inicial
+filterBy('all');
+  
+  // ï¿½ï¿½ï¿½ ACCIONES DE NAVEGACI+ï¿½N ï¿½ï¿½ï¿½  
+  document.querySelectorAll('.sheet-nav').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switch (btn.dataset.action) {
+        case 'about':   document.getElementById('aboutBtn').click();     break;
+        case 'contact': document.getElementById('contactBtn').click();    break;
+        case 'dark':    document.getElementById('darkModeToggle').click();break;
+        case 'reset':   document.getElementById('resetBtn').click();      break;
+      }
+      bottomSheet.classList.remove('open');
+    });
+  });
+
+  // ï¿½ï¿½ï¿½ RESET, DARK, ABOUT, CONTACT ï¿½ï¿½ï¿½  
+  const resetBtn   = document.getElementById('resetBtn');
+  const darkBtn    = document.getElementById('darkModeToggle');
+  const aboutBtn  = document.getElementById('aboutBtn');
+  const aboutSec   = document.getElementById('aboutSection');
+  const closeAbout = document.getElementById('closeAbout');
+  const pop        = document.getElementById('popup');
+  const closePopBtn= document.getElementById('closePopup');
+// ï¿½ï¿½ï¿½ HEADER M+ï¿½VIL: hamburguesa, home y lupa ï¿½ï¿½ï¿½
+
+// 1) Men+ï¿½ hamburguesa (t+ï¿½ lo usar+ï¿½s para mostrar tu nav lateral)
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const mobileNav     = document.getElementById('mobileNav');
+hamburgerBtn.addEventListener('click', () => {
+  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+  hamburgerBtn.setAttribute('aria-expanded', String(!isExpanded));
+  mobileNav.hidden = isExpanded;
+  document.body.classList.toggle('menu-open', !isExpanded);
+  // Opcional: mueve el foco al primer +ï¿½tem del men+ï¿½
+  if (!isExpanded) {
+    mobileNav.querySelector('[role="menuitem"]')?.focus();
+  }
+  hamburgerBtn.setAttribute(
+  'aria-label',
+  !isExpanded ? 'Cerrar men+ï¿½' : 'Abrir men+ï¿½'
+);
+hamburgerBtn.focus();
+});
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Cerrar men+ï¿½ al hacer click en un +ï¿½tem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+const menuItems = mobileNav.querySelectorAll('[role="menuitem"]');
+menuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    // 1) Cerrar el nav
+    mobileNav.hidden = true;
+    // 2) Actualizar ARIA en el bot+ï¿½n
+    hamburgerBtn.setAttribute('aria-expanded', 'false');
+    hamburgerBtn.setAttribute('aria-label', 'Abrir men+ï¿½');
+    // 3) Quitar clase de estilos abiertos (si la usas)
+    document.body.classList.remove('menu-open');
+    // 4) (Opcional) devolver foco al contenido principal  
+    document.getElementById('gallery')?.focus();
+  });
+});
+
+// 1) Filtros: reutiliza tu funci+ï¿½n `filterGallery`
+document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filt = btn.getAttribute('data-filter');
+    filterBy(filt);            // ï¿½ï¿½ï¿½ usa la funci+ï¿½n existente
+    document.body.classList.remove('menu-open');
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && hamburgerBtn.getAttribute('aria-expanded') === 'true') {
+    hamburgerBtn.click();  // reutiliza tu propio toggle
+  }
+});
+// 2) Info (About) y Contact
+document.getElementById('aboutNav').addEventListener('click', () => {
+  document.getElementById('aboutBtn').click();
+  document.body.classList.remove('menu-open');
+});
+document.getElementById('contactNav').addEventListener('click', () => {
+  document.getElementById('contactBtn').click();
+  document.body.classList.remove('menu-open');
+});
+// ï¿½ï¿½ï¿½ Toggle del submen+ï¿½ ï¿½Ç£Publicacionesï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+const pubNavBtn = document.getElementById('pubNav');
+const pubNavLi  = pubNavBtn.parentElement;  // <li class="has-submenu">
+pubNavBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const isOpen = pubNavBtn.getAttribute('aria-expanded') === 'true';
+  pubNavBtn.setAttribute('aria-expanded', String(!isOpen));
+  pubNavLi.classList.toggle('open');
+
+});
+
+// Cerrar submen+ï¿½ si clicas fuera del mismo
+document.addEventListener('click', () => {
+  if (pubNavLi.classList.contains('open')) {
+    pubNavBtn.setAttribute('aria-expanded', 'false');
+    pubNavLi.classList.remove('open');
+  }
+});
+
+
+// 2) Bot+ï¿½n Home (scroll al inicio)
+const homeBtn = document.getElementById('homeBtn');
+homeBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+ // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ B+ï¿½SQUEDA SOBRE LA GALER+ï¿½A ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ const searchBtns      = [
+  document.getElementById('searchBtnMobile'),
+  document.getElementById('searchBtnDesktop')
+].filter(Boolean);
+
+const searchContainer = document.getElementById('searchContainer');
+const searchForm      = document.getElementById('searchForm');
+const searchInput     = document.getElementById('searchInput');
+const thumbnails      = Array.from(document.querySelectorAll('.draggable'));
+
+// 1) Engancha el mismo handler a cada bot+ï¿½n de b+ï¿½squeda
+searchBtns.forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      searchContainer.classList.toggle('hidden');
+      if (!searchContainer.classList.contains('hidden')) {
+        searchInput.focus();
+      }
+    });
+  });
+
+// 2) Cerrar la barra si clicas fuera de ella O de cualquiera de los botones
+document.addEventListener('click', e => {
+    const clickedBtn = searchBtns.some(btn => btn === e.target);
+    if (!searchContainer.contains(e.target) && !clickedBtn) {
+      searchContainer.classList.add('hidden');
+    }
+});
+
+// 3) Filtrar miniaturas al enviar
+searchForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const q = searchInput.value.trim().toLowerCase();
+  thumbnails.forEach(img => {
+    const hayTexto = (
+      img.id + ' ' +
+      img.alt + ' ' +
+      (img.dataset.description || '')
+    ).toLowerCase();
+    img.style.display = hayTexto.includes(q) ? '' : 'none';
+  });
+  updateArtworkLayoutState();
+});
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FIN B+ï¿½SQUEDA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+
+
+  // Reset sin recargar
+  resetBtn.onclick = () => {
+    localStorage.removeItem(dataKey);
+    load();
+    filterBy('all');
+    if (typeof window.__setFolders === 'function') window.__setFolders(null);
+    updateArtworkLayoutState();
+  };
+  // Dark mode persistente
+  if (localStorage.getItem(darkKey) === 'true') document.body.classList.add('dark');
+  darkBtn.onclick = toggleDark;
+  // Modal About
+  aboutBtn.addEventListener('click', e => {
+     e.preventDefault();
+     aboutSec.classList.remove('hidden');
+     aboutBtn.setAttribute('aria-expanded', 'true');
+     aboutSec.setAttribute('aria-hidden', 'false');
+    closeAbout.focus();
+    });
+  
+  closeAbout.onclick = () => aboutSec.classList.add('hidden');
+
+ // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Modal Contact ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+   // 1) Captura correctamente todos los nodos que vas a usar
+   const contactSec     = document.getElementById('contactSection');
+   const closeContact   = document.getElementById('closeContact');
+   const contactBtn     = document.getElementById('contactBtn');
+
+
+
+// Abrir modal
+contactBtn.addEventListener('click', () => {
+  contactSec.classList.remove('hidden');
+  contactBtn.setAttribute('aria-expanded', 'true');
+  sendMailBtn.focus();    // o closeContact.focus();
+});
+// Cerrar modal (bot+ï¿½n X)
+closeContact.addEventListener('click', () => {
+  contactSec.classList.add('hidden');
+  contactBtn.setAttribute('aria-expanded', 'false');
+  contactBtn.focus();
+});
+const sendMailBtn = document.getElementById('sendMailBtn');
+sendMailBtn.addEventListener('click', () => {
+  // reemplaza con los correos destino, separados por comas si son varios
+  window.location.href = 'mailto:antoniomonelopez@gmail.com';
+});
+
+  // Cerrar modales con Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (!aboutSec.classList.contains('hidden')) aboutSec.classList.add('hidden');
+      if (pop.classList.contains('active')) closePop();
+    }
+  });
+  // ï¿½ï¿½ï¿½ CONFIGURAR IM+ï¿½GENES DRAG & POPUP ï¿½ï¿½ï¿½  
+  const imgs = Array.from(document.querySelectorAll('.draggable'));
+  load();
+  imgs.forEach(img => {
+    setupLoad(img);
+    img.style.left = '';
+    img.style.top = '';
+    img.style.position = '';
+    img.tabIndex = 0;
+    const isFolder = img.classList.contains('folder-year');
+    img.ondblclick = isFolder ? null : (() => showPop(img));
+    if ('ontouchstart' in window && !isFolder) {
+      img.addEventListener('click', e => {
+        e.stopPropagation();
+        showPop(img);
+      });
+    }
+  });
+  prepareGalleryLayout();
+  updateArtworkLayoutState();
+  closePopBtn.onclick = closePop;
+  pop.onclick = e => { if (e.target === pop) closePop(); };
+
+  // Din+ï¿½mico
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+  
+// --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------
+
+// 1) Referencia al <img> del popup
+const popupImg = document.getElementById('popupImage');
+
+// 2) Listener de doble clic en escritorio
+popupImg.addEventListener('dblclick', () => {
+  if (!document.fullscreenElement) {
+    popupImg.requestFullscreen().catch(err => {
+      console.error(`Error al pedir fullscreen: ${err.message}`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+// === UX Enhancements moved from index.html (guarded to avoid double bind) ===
+(function(){
+  if (window._uxEnhanced) return; window._uxEnhanced = true;
+  // 1) No popup for folders
+  const overrideShowPop = () => {
+    const g = window.showPop; if (typeof g !== 'function') return;
+    window.showPop = function(el){
+      try { if (el && (el.classList?.contains('folder-year') || el.closest?.('.folder-year'))) return; } catch(_){ }
+      return g.apply(this, arguments);
+    };
+  };
+
+  // 2) Show folders only in their category + default open 2025
+  const initFolderVisibility = () => {
+    const apply = (cat) => {
+      document.querySelectorAll('.folder-year').forEach(el => {
+        el.style.display = (el.getAttribute('data-category') === cat) ? 'block' : 'none';
+      });
+    };
+    const active = document.querySelector('.filter-btn.active');
+    apply(active ? active.dataset.cat : 'all');
+    const hook = (btn, getCat) => btn.addEventListener('click', () => apply(getCat(btn)));
+    document.querySelectorAll('.filter-btn').forEach(b => hook(b, x=>x.dataset.cat));
+    document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(b => hook(b, x=>x.getAttribute('data-filter')));
+    document.querySelectorAll('.sheet-filter').forEach(b => hook(b, x=>x.dataset.cat));
+  };
+
+  // 3) Auto-open 2025 per category and folder icon toggle
+  const initFolderDefaults = () => {
+    const idMap = { copias:'Folder2025', pinturas:'PaintFolder2025', dibujos:'DrawFolder2025' };
+    const clickDefault = (cat) => { const id=idMap[cat]; const el=id&&document.getElementById(id); el&&setTimeout(()=>el.dispatchEvent(new MouseEvent('click',{bubbles:true})),0); };
+    const active = document.querySelector('.filter-btn.active'); if (active) clickDefault(active.dataset.cat);
+    document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>clickDefault(b.dataset.cat)));
+    document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(b=>b.addEventListener('click',()=>clickDefault(b.getAttribute('data-filter'))));
+    document.querySelectorAll('.sheet-filter').forEach(b=>b.addEventListener('click',()=>clickDefault(b.dataset.cat)));
+
+    const CLOSED='dist/images/aqua-icons/Aqua  Folder.ico', OPEN='dist/images/aqua-icons/Aqua Favorites.ico';
+    const folders=[...document.querySelectorAll('.folder-year')];
+    const setOpen=(f)=>{
+      const cat=f.getAttribute('data-category');
+      folders.forEach(n=>{ if(n.getAttribute('data-category')===cat){ n.classList.remove('open'); const i=n.querySelector('.folder-icon'); if(i) i.src=CLOSED; }});
+      f.classList.add('open'); const i=f.querySelector('.folder-icon'); if(i) i.src=OPEN;
+    };
+    folders.forEach(f=>f.addEventListener('click',e=>{ e.stopPropagation(); setOpen(f);}));
+  };
+
+  // 4) Pinturas: ï¿½Ç£Anterioresï¿½ï¿½ï¿½ muestra todo; 2025 oculta
+  const initPinturasPrev = () => {
+    const prev=document.getElementById('PaintFolderPrev'); const y25=document.getElementById('PaintFolder2025');
+    const items=[...document.querySelectorAll('.draggable[data-category="pinturas"]')].filter(el=>!el.classList.contains('folder-year'));
+    if(!prev||!items.length) return;
+    const hide = () => { items.forEach(e => e.style.display = 'none'); updateArtworkLayoutState(); }; const show = () => { items.forEach(e => { e.style.display = 'block'; }); updateArtworkLayoutState(); };
+    hide(); prev.addEventListener('click',e=>{e.stopPropagation(); show();}); if(y25) y25.addEventListener('click',e=>{e.stopPropagation(); hide();});
+  };
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    overrideShowPop();
+    initFolderVisibility();
+    initFolderDefaults();
+    initPinturasPrev();
+  });
+})();
+// === End UX Enhancements ===
+
+// === Misc small inits ===
+document.addEventListener('DOMContentLoaded', ()=>{
+  const y = document.getElementById('currentYear'); if(y) y.textContent = new Date().getFullYear();
+  // Force full-res images
+  document.querySelectorAll('.image-gallery .draggable').forEach(img=>{
+    const real = img.getAttribute('data-popup-src'); if(!real) return;
+    const pic = img.closest('picture'); if(pic){ const webp = pic.querySelector('source[type="image/webp"]'); if(webp){ if(real.endsWith('.webp')) webp.setAttribute('srcset', real); else webp.remove(); } }
+    img.setAttribute('src', real); img.setAttribute('loading','eager'); img.setAttribute('fetchpriority','high');
+  });
+});
+// === End misc ===
+// 3) Listener de ï¿½Ç£double-tapï¿½ï¿½ï¿½ en m+ï¿½vil (touchend)
+let lastTap = 0;
+popupImg.addEventListener('touchend', e => {
+  const currentTime = new Date().getTime();
+  const tapLength   = currentTime - lastTap;
+  if (tapLength < 300 && tapLength > 0) {
+    // Double-tap detectado: toggle fullscreen
+    if (!document.fullscreenElement) {
+      popupImg.requestFullscreen().catch(err => {
+        console.error(`Error al pedir fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+  lastTap = currentTime;
+});
+});
+
+
