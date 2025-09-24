@@ -1,4 +1,4 @@
-// ��������� Google Analytics condicional ���������
+﻿// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Google Analytics condicional ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 function loadAnalytics() {
   if (document.getElementById('ga-script')) return;
   const s = document.createElement('script');
@@ -50,7 +50,7 @@ function setupLegalModals() {
       modal.classList.add('active');
       // Aria
       trigger.setAttribute('aria-expanded', 'true');
-      // Focus en el bot+�n de cerrar
+      // Focus en el bot+ï¿½n de cerrar
       closeBtn.focus();
     });
   });
@@ -85,27 +85,27 @@ function setupLegalModals() {
     }
   });
 }
-  // �Ǫel resto de tu init para splash/galer+�a, etc.
+  // ï¿½Çªel resto de tu init para splash/galer+ï¿½a, etc.
 window.addEventListener('load', () => {
   const splash      = document.getElementById('splash');
   const video       = document.getElementById('splashVideo');
   const mainContent = document.getElementById('mainContent');
   if (!splash || !video || !mainContent) return;
-  // >>> Forzamos atributos imprescindibles para autoplay en m+�vil:
+  // >>> Forzamos atributos imprescindibles para autoplay en m+ï¿½vil:
   video.autoplay = true;
   video.muted = true;
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
   video.setAttribute('preload', 'auto');
 
-  // --- Opcional: arrancar s+�lo cuando haya suficiente buffer ---
+  // --- Opcional: arrancar s+ï¿½lo cuando haya suficiente buffer ---
   video.addEventListener('canplaythrough', () => {
   video.play().catch(() => {
     /* Autoplay might be blocked; ignore the error */
   });
 });
 
-  // Cuando el v+�deo termina, lanzamos la transici+�n cruzada
+  // Cuando el v+ï¿½deo termina, lanzamos la transici+ï¿½n cruzada
   video.addEventListener('ended', () => {
   splash.addEventListener('transitionend', () => {
     splash.remove();
@@ -127,13 +127,12 @@ window.addEventListener('load', () => {
   });
 });
 
-// ��������� Global keys & state ���������
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Global keys & state ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 const dataKey = 'fs_positions';
 const defaultPositions = {};
 const darkKey = 'fs_dark';
 const keyStep = 10;
-let state = { el: null, sx: 0, sy: 0, ox: 0, oy: 0, lt: null };
-const DEBUG = false;
+let state = { el: null, sx: 0, sy: 0, ox: 0, oy: 0 };
 function getRect() {
   return document.querySelector('.gallery-container').getBoundingClientRect();
 }
@@ -153,11 +152,11 @@ function load() {
 
     const forceDefault = img.classList.contains('folder-year') && isDesktop();
     if (saved[img.id] != null && !forceDefault) {
-      // Si hay posici+�n guardada, +�sala
+      // Si hay posici+ï¿½n guardada, +ï¿½sala
       x = saved[img.id].x;
       y = saved[img.id].y;
     } else {
-      // Si no hay guardado, usa la posici+�n por defecto del CSS
+      // Si no hay guardado, usa la posici+ï¿½n por defecto del CSS
       const def = defaultPositions[img.id] || { x: 0, y: 0 };
       x = def.x;
       y = def.y;
@@ -187,7 +186,6 @@ function toggleDark() {
   localStorage.setItem(darkKey, d);
 }
 function showPop(i) {
-  console.log('���� showPop invocado para', i.id);
   const pop = document.getElementById('popup');
   const imgTag = document.getElementById('popupImage');
   const titleTag= document.getElementById('popupTitle');
@@ -198,7 +196,7 @@ function showPop(i) {
   imgTag.src     = nuevaSrc;
 
   titleTag.textContent = i.alt;
-    // Permitir saltos de l+�nea o HTML sencillo en la descripci+�n
+    // Permitir saltos de l+ï¿½nea o HTML sencillo en la descripci+ï¿½n
   descTag.innerHTML = (i.dataset.description || '').replace(/\n/g, '<br>');
     // 3) Limpiar la lista de detalles (para evitar duplicados de popups anteriores)
   detalleLista.innerHTML = '';
@@ -216,11 +214,11 @@ function showPop(i) {
     const inspiracion = i.dataset.detailInspiracion || 'No disponible';
 
     const items = [
-      `T+�cnica: ${tecnica}`,
+      `T+ï¿½cnica: ${tecnica}`,
       `Medidas: ${medidas}`,
-      `A+�o de ejecuci+�n: ${ano}`,
+      `A+ï¿½o de ejecuci+ï¿½n: ${ano}`,
       `Proceso creativo: ${proceso}`,
-      `Inspiraci+�n: ${inspiracion}`
+      `Inspiraci+ï¿½n: ${inspiracion}`
     ];
 
     items.forEach(texto => {
@@ -240,23 +238,22 @@ function closePop() {
 }
 
 
-// ��������� Main initialization ���������
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Main initialization ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
   document.addEventListener('DOMContentLoaded', () => {
   initCookieModal();
    setupLegalModals();
 
-    localStorage.removeItem(dataKey);
-      // ��������� Textos traducibles ���������
+      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Textos traducibles ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   const texts = {
     // Nav / modales
     about:           { es: 'Info',             en: 'About' },
     contact:         { es: 'Contacto',          en: 'Contact' },
     aboutTitle:      { es: 'Sobre Antonio Monereo',en: 'About Antonio Monereo' },
-    contactTitle:    { es: 'Env+�anos un email',  en: 'Send us an email' },
+    contactTitle:    { es: 'Env+ï¿½anos un email',  en: 'Send us an email' },
     close:           { es: 'Cerrar',            en: 'Close' },
-    aboutInfo:     { es: 'Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentr+� muy pronto en el mundo del arte: comenz+� a dibujar desde ni+�o, gan+� un primer premio en el certamen "Toledo desde el Alc+�zar" (2016) y desde 2019 ejerce como uno de los copistas m+�s j+�venes del Museo del Prado. Su acercamiento al arte es profundamente cl+�sico, con una destacada t+�cnica acad+�mica, pero tambi+�n muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.',
-       en: 'Antonio Monereo (Madrid, 2001) is a young painter and draftsman who studied Fine Arts at the Complutense University and Art History at the UNED. He discovered his passion for art early on, began drawing as a child, won first prize in the "Toledo from the Alc+�zar" contest in 2016, and has been one of the youngest official copyists at the Prado Museum since 2019. His approach to art is deeply classical, with a strong academic technique, yet also deeply personal: in interviews, he has shared that painting has been both a refuge and a way to affirm his identity and find his place in the world.' },
+    aboutInfo:     { es: 'Antonio Monereo (Madrid, 2001) es un joven pintor y dibujante formado en Bellas Artes en la Universidad Complutense y en Historia del Arte en la UNED. Se adentr+ï¿½ muy pronto en el mundo del arte: comenz+ï¿½ a dibujar desde ni+ï¿½o, gan+ï¿½ un primer premio en el certamen "Toledo desde el Alc+ï¿½zar" (2016) y desde 2019 ejerce como uno de los copistas m+ï¿½s j+ï¿½venes del Museo del Prado. Su acercamiento al arte es profundamente cl+ï¿½sico, con una destacada t+ï¿½cnica acad+ï¿½mica, pero tambi+ï¿½n muy personal: en entrevistas ha confesado que la pintura ha sido su refugio y medio para afirmarse y encontrar su lugar.',
+       en: 'Antonio Monereo (Madrid, 2001) is a young painter and draftsman who studied Fine Arts at the Complutense University and Art History at the UNED. He discovered his passion for art early on, began drawing as a child, won first prize in the "Toledo from the Alc+ï¿½zar" contest in 2016, and has been one of the youngest official copyists at the Prado Museum since 2019. His approach to art is deeply classical, with a strong academic technique, yet also deeply personal: in interviews, he has shared that painting has been both a refuge and a way to affirm his identity and find his place in the world.' },
     pubBtn:         { es: 'Publicaciones',    en: 'Publications' },
     Shangay:      { es: 'Entrevista Shangay',         en: 'Shangay Interview' },
     Telemadrid: { es: 'Entrevista Telemadrid',        en: 'Telemadrid Interview' },
@@ -288,18 +285,18 @@ function closePop() {
       lang = (lang === 'es' ? 'en' : 'es');
       applyLang(lang);
     });
-    // ��� Toggle del men+� de Publicaciones ���
+    // ï¿½ï¿½ï¿½ Toggle del men+ï¿½ de Publicaciones ï¿½ï¿½ï¿½
 const pubBtn  = document.getElementById('pubBtn');
 const pubMenu = document.getElementById('pubMenu');
 const bottomSheet = document.getElementById('bottomSheet');
 
 // Al hacer clic, alternar la clase "open" en el contenedor .dropdown
 pubBtn.addEventListener('click', e => {
-  e.stopPropagation();             // evita cerrar al hacer clic en el bot+�n
+  e.stopPropagation();             // evita cerrar al hacer clic en el bot+ï¿½n
   pubBtn.parentElement.classList.toggle('open');
 });
 
-// Si haces clic fuera, cierra el men+�
+// Si haces clic fuera, cierra el men+ï¿½
 document.addEventListener('click', () => {
   pubBtn.parentElement.classList.remove('open');
   });
@@ -356,7 +353,7 @@ if (desktopMedia.addEventListener) {
   });
 }
 
-// 2) Define la funci�n de filtrado
+// 2) Define la funciï¿½n de filtrado
 function filterBy(cat) {
   galleryItems.forEach(img => {
     const shouldDisplay = cat !== 'all' && img.dataset.category === cat;
@@ -367,17 +364,17 @@ function filterBy(cat) {
   });
   arrangeDesktopFolders(cat);
 }
-// 0) Cachear el homeBtn m+�vil
+// 0) Cachear el homeBtn m+ï¿½vil
 const homeBtnMobile = document.getElementById('homeBtn');
 
-// 1) Al clicar en m+�vil sobre "Antonio Monereo"
+// 1) Al clicar en m+ï¿½vil sobre "Antonio Monereo"
 homeBtnMobile.addEventListener('click', e => {
   e.preventDefault();
   // a) Resetear filtros igual que si clicases "all"
   filterBy('all');
-  // b) Cerrar men+� lateral si estuviera abierto
+  // b) Cerrar men+ï¿½ lateral si estuviera abierto
   document.body.classList.remove('menu-open');
-  // c) Si usas bottomSheet para filtros, ci+�rralo tambi+�n
+  // c) Si usas bottomSheet para filtros, ci+ï¿½rralo tambi+ï¿½n
   if (typeof bottomSheet !== 'undefined') {
     bottomSheet.classList.remove('open');
   }
@@ -388,13 +385,13 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const cat = btn.dataset.cat;    // 'all' | 'copias' | 'pinturas' | 'dibujos'
     filterBy(cat);
-    bottomSheet.classList.remove('open');  // cierra el panel en m+�vil si est+� abierto
+    bottomSheet.classList.remove('open');  // cierra el panel en m+ï¿½vil si est+ï¿½ abierto
   });
 });
 // 4) Aplica estado inicial
 filterBy('all');
   
-  // ��� ACCIONES DE NAVEGACI+�N ���  
+  // ï¿½ï¿½ï¿½ ACCIONES DE NAVEGACI+ï¿½N ï¿½ï¿½ï¿½  
   document.querySelectorAll('.sheet-nav').forEach(btn => {
     btn.addEventListener('click', () => {
       switch (btn.dataset.action) {
@@ -407,7 +404,7 @@ filterBy('all');
     });
   });
 
-  // ��� RESET, DARK, ABOUT, CONTACT ���  
+  // ï¿½ï¿½ï¿½ RESET, DARK, ABOUT, CONTACT ï¿½ï¿½ï¿½  
   const resetBtn   = document.getElementById('resetBtn');
   const darkBtn    = document.getElementById('darkModeToggle');
   const aboutBtn  = document.getElementById('aboutBtn');
@@ -415,9 +412,9 @@ filterBy('all');
   const closeAbout = document.getElementById('closeAbout');
   const pop        = document.getElementById('popup');
   const closePopBtn= document.getElementById('closePopup');
-// ��� HEADER M+�VIL: hamburguesa, home y lupa ���
+// ï¿½ï¿½ï¿½ HEADER M+ï¿½VIL: hamburguesa, home y lupa ï¿½ï¿½ï¿½
 
-// 1) Men+� hamburguesa (t+� lo usar+�s para mostrar tu nav lateral)
+// 1) Men+ï¿½ hamburguesa (t+ï¿½ lo usar+ï¿½s para mostrar tu nav lateral)
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const mobileNav     = document.getElementById('mobileNav');
 hamburgerBtn.addEventListener('click', () => {
@@ -425,25 +422,25 @@ hamburgerBtn.addEventListener('click', () => {
   hamburgerBtn.setAttribute('aria-expanded', String(!isExpanded));
   mobileNav.hidden = isExpanded;
   document.body.classList.toggle('menu-open', !isExpanded);
-  // Opcional: mueve el foco al primer +�tem del men+�
+  // Opcional: mueve el foco al primer +ï¿½tem del men+ï¿½
   if (!isExpanded) {
     mobileNav.querySelector('[role="menuitem"]')?.focus();
   }
   hamburgerBtn.setAttribute(
   'aria-label',
-  !isExpanded ? 'Cerrar men+�' : 'Abrir men+�'
+  !isExpanded ? 'Cerrar men+ï¿½' : 'Abrir men+ï¿½'
 );
 hamburgerBtn.focus();
 });
-// ��������� Cerrar men+� al hacer click en un +�tem ���������
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Cerrar men+ï¿½ al hacer click en un +ï¿½tem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 const menuItems = mobileNav.querySelectorAll('[role="menuitem"]');
 menuItems.forEach(item => {
   item.addEventListener('click', () => {
     // 1) Cerrar el nav
     mobileNav.hidden = true;
-    // 2) Actualizar ARIA en el bot+�n
+    // 2) Actualizar ARIA en el bot+ï¿½n
     hamburgerBtn.setAttribute('aria-expanded', 'false');
-    hamburgerBtn.setAttribute('aria-label', 'Abrir men+�');
+    hamburgerBtn.setAttribute('aria-label', 'Abrir men+ï¿½');
     // 3) Quitar clase de estilos abiertos (si la usas)
     document.body.classList.remove('menu-open');
     // 4) (Opcional) devolver foco al contenido principal  
@@ -451,11 +448,11 @@ menuItems.forEach(item => {
   });
 });
 
-// 1) Filtros: reutiliza tu funci+�n `filterGallery`
+// 1) Filtros: reutiliza tu funci+ï¿½n `filterGallery`
 document.querySelectorAll('.mobile-nav-btn[data-filter]').forEach(btn => {
   btn.addEventListener('click', () => {
     const filt = btn.getAttribute('data-filter');
-    filterBy(filt);            // ��� usa la funci+�n existente
+    filterBy(filt);            // ï¿½ï¿½ï¿½ usa la funci+ï¿½n existente
     document.body.classList.remove('menu-open');
   });
 });
@@ -473,7 +470,7 @@ document.getElementById('contactNav').addEventListener('click', () => {
   document.getElementById('contactBtn').click();
   document.body.classList.remove('menu-open');
 });
-// ��� Toggle del submen+� �ǣPublicaciones��� ���
+// ï¿½ï¿½ï¿½ Toggle del submen+ï¿½ ï¿½Ç£Publicacionesï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 const pubNavBtn = document.getElementById('pubNav');
 const pubNavLi  = pubNavBtn.parentElement;  // <li class="has-submenu">
 pubNavBtn.addEventListener('click', e => {
@@ -484,7 +481,7 @@ pubNavBtn.addEventListener('click', e => {
 
 });
 
-// Cerrar submen+� si clicas fuera del mismo
+// Cerrar submen+ï¿½ si clicas fuera del mismo
 document.addEventListener('click', () => {
   if (pubNavLi.classList.contains('open')) {
     pubNavBtn.setAttribute('aria-expanded', 'false');
@@ -493,13 +490,13 @@ document.addEventListener('click', () => {
 });
 
 
-// 2) Bot+�n Home (scroll al inicio)
+// 2) Bot+ï¿½n Home (scroll al inicio)
 const homeBtn = document.getElementById('homeBtn');
 homeBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
- // ��������� B+�SQUEDA SOBRE LA GALER+�A ���������
+ // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ B+ï¿½SQUEDA SOBRE LA GALER+ï¿½A ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  const searchBtns      = [
   document.getElementById('searchBtnMobile'),
   document.getElementById('searchBtnDesktop')
@@ -510,7 +507,7 @@ const searchForm      = document.getElementById('searchForm');
 const searchInput     = document.getElementById('searchInput');
 const thumbnails      = Array.from(document.querySelectorAll('.draggable'));
 
-// 1) Engancha el mismo handler a cada bot+�n de b+�squeda
+// 1) Engancha el mismo handler a cada bot+ï¿½n de b+ï¿½squeda
 searchBtns.forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -542,7 +539,7 @@ searchForm.addEventListener('submit', e => {
     img.style.display = hayTexto.includes(q) ? '' : 'none';
   });
 });
-// ��������� FIN B+�SQUEDA ���������
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FIN B+ï¿½SQUEDA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 
 
@@ -558,7 +555,7 @@ searchForm.addEventListener('submit', e => {
   // Dark mode persistente
   if (localStorage.getItem(darkKey) === 'true') document.body.classList.add('dark');
   darkBtn.onclick = toggleDark;
-  /* Modal About
+  // Modal About
   aboutBtn.addEventListener('click', e => {
      e.preventDefault();
      aboutSec.classList.remove('hidden');
@@ -569,7 +566,7 @@ searchForm.addEventListener('submit', e => {
   
   closeAbout.onclick = () => aboutSec.classList.add('hidden');
 
- // ������ Modal Contact ������
+ // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Modal Contact ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
    // 1) Captura correctamente todos los nodos que vas a usar
    const contactSec     = document.getElementById('contactSection');
    const closeContact   = document.getElementById('closeContact');
@@ -583,7 +580,7 @@ contactBtn.addEventListener('click', () => {
   contactBtn.setAttribute('aria-expanded', 'true');
   sendMailBtn.focus();    // o closeContact.focus();
 });
-// Cerrar modal (bot+�n X)
+// Cerrar modal (bot+ï¿½n X)
 closeContact.addEventListener('click', () => {
   contactSec.classList.add('hidden');
   contactBtn.setAttribute('aria-expanded', 'false');
@@ -595,12 +592,6 @@ sendMailBtn.addEventListener('click', () => {
   window.location.href = 'mailto:antoniomonelopez@gmail.com';
 });
 
-// Cerrar con Escape
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !contactSec.classList.contains('hidden')) {
-    closeContact.click();
-  }
-});
   // Cerrar modales con Escape
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
@@ -608,14 +599,13 @@ document.addEventListener('keydown', e => {
       if (pop.classList.contains('active')) closePop();
     }
   });
-*/
-  // ��� CONFIGURAR IM+�GENES DRAG & POPUP ���  
+  // ï¿½ï¿½ï¿½ CONFIGURAR IM+ï¿½GENES DRAG & POPUP ï¿½ï¿½ï¿½  
   const imgs = Array.from(document.querySelectorAll('.draggable'));
   imgs.forEach(img => {
       img.style.position = 'absolute';
     });
 imgs.forEach(img => {
-  const galleryRect = getRect();              // tu funci+�n que devuelve .gallery-container.getBoundingClientRect()
+  const galleryRect = getRect();              // tu funci+ï¿½n que devuelve .gallery-container.getBoundingClientRect()
 const imgRect     = img.getBoundingClientRect();
 defaultPositions[img.id] = {
   x: imgRect.left - galleryRect.left,
@@ -633,7 +623,7 @@ load();
   imgs.forEach(i => {
     i.onpointerdown = e => {
       if (isDesktop() && i.classList.contains('folder-year')) return;
-      // S+�lo preventDefault si no es touch, para no romper el doble���tap en m+�vil
+      // S+ï¿½lo preventDefault si no es touch, para no romper el dobleï¿½ï¿½ï¿½tap en m+ï¿½vil
       if (e.pointerType !== 'touch') {
         e.preventDefault();
       }
@@ -649,7 +639,6 @@ load();
   let x = state.ox + (e.clientX - state.sx);
   let y = state.oy + (e.clientY - state.sy);
 
-  console.log(`Moviendo: ${i.id}, X: ${x}, Y: ${y}, R.width: ${R.width}, R.height: ${R.height}`);
 
   x = Math.min(Math.max(0, x), R.width  - i.offsetWidth);
   y = Math.min(Math.max(0, y), R.height - i.offsetHeight);
@@ -666,15 +655,15 @@ load();
         state.el = null;
       }
     };
-// ��� Tap sencillo en m+�vil para abrir popup ���
+// ï¿½ï¿½ï¿½ Tap sencillo en m+ï¿½vil para abrir popup ï¿½ï¿½ï¿½
 // 1) dejamos intacto el dblclick para escritorio (evitar en carpetas)
 const isFolder = i.classList.contains('folder-year');
 i.ondblclick = isFolder ? null : (() => showPop(i));
 
-// 2) a+�adimos click s+�lo en dispositivos t+�ctiles
+// 2) a+ï¿½adimos click s+ï¿½lo en dispositivos t+ï¿½ctiles
 if ('ontouchstart' in window && !isFolder) {
   i.addEventListener('click', e => {
-    e.stopPropagation();   // que no �ǣrebote��� el click al overlay
+    e.stopPropagation();   // que no ï¿½Ç£reboteï¿½ï¿½ï¿½ el click al overlay
     showPop(i);
   });
 }
@@ -706,7 +695,7 @@ if ('ontouchstart' in window && !isFolder) {
   closePopBtn.onclick = closePop;
   pop.onclick = e => { if (e.target === pop) closePop(); };
 
-  // Din+�mico
+  // Din+ï¿½mico
   document.getElementById('currentYear').textContent = new Date().getFullYear();
   
 // --------------- FULLSCREEN AL DOUBLE-CLICK / DOUBLE-TAP ---------------
@@ -771,7 +760,7 @@ popupImg.addEventListener('dblclick', () => {
     folders.forEach(f=>f.addEventListener('click',e=>{ e.stopPropagation(); setOpen(f);}));
   };
 
-  // 4) Pinturas: �ǣAnteriores��� muestra todo; 2025 oculta
+  // 4) Pinturas: ï¿½Ç£Anterioresï¿½ï¿½ï¿½ muestra todo; 2025 oculta
   const initPinturasPrev = () => {
     const prev=document.getElementById('PaintFolderPrev'); const y25=document.getElementById('PaintFolder2025');
     const items=[...document.querySelectorAll('.draggable[data-category="pinturas"]')].filter(el=>!el.classList.contains('folder-year'));
@@ -805,7 +794,7 @@ popupImg.addEventListener('dblclick', () => {
     };
     const title = img.getAttribute('alt') || img.id || '';
     const desc  = textFromHTML(img.dataset.description || '');
-    const short = desc.length > 220 ? (desc.slice(0,217)+'�Ǫ') : desc;
+    const short = desc.length > 220 ? (desc.slice(0,217)+'ï¿½Çª') : desc;
     cap.innerHTML = `<b>${title}</b>${short? '\n'+short:''}`;
     return cap;
   }
@@ -863,7 +852,7 @@ popupImg.addEventListener('dblclick', () => {
     $('.sheet-filter').forEach(b=>b.addEventListener('click', reSync));
     $('.folder-year').forEach(f=>f.addEventListener('click', reSync));
 
-    // M+�vil: tap para ver/ocultar etiqueta sin popup
+    // M+ï¿½vil: tap para ver/ocultar etiqueta sin popup
     const isMobile = ()=> matchMedia('(max-width:600px)').matches;
     const container = document.querySelector('.image-gallery');
     if(container){
@@ -888,7 +877,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 });
 // === End misc ===
-// 3) Listener de �ǣdouble-tap��� en m+�vil (touchend)
+// 3) Listener de ï¿½Ç£double-tapï¿½ï¿½ï¿½ en m+ï¿½vil (touchend)
 let lastTap = 0;
 popupImg.addEventListener('touchend', e => {
   const currentTime = new Date().getTime();
@@ -906,3 +895,5 @@ popupImg.addEventListener('touchend', e => {
   lastTap = currentTime;
 });
 });
+
+
