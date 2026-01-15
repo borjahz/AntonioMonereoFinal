@@ -1098,6 +1098,131 @@ body.cat-dibujos  .image-gallery .draggable.folder-year[data-category="dibujos"]
   #DrawFolder2025 { order: 1; }
   .art-caption { display: none; }
 }
+/* --- Gallery grid layout overrides --- */
+.image-gallery.layout-ready {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 5vw, 3.5rem)
+           clamp(3rem, 6vw, 4.5rem);
+}
+
+.image-gallery.layout-ready .folder-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  row-gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  .image-gallery.layout-ready .folder-grid {
+    justify-content: center;
+  }
+}
+
+.image-gallery.layout-ready .folder-grid .folder-year {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  width: clamp(110px, 12vw, 150px);
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  box-shadow: none;
+  touch-action: manipulation !important;
+}
+
+.image-gallery.layout-ready .folder-grid .folder-year:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+}
+
+.image-gallery.layout-ready .folder-grid .folder-icon {
+  width: clamp(80px, 10vw, 120px) !important;
+  height: auto !important;
+}
+
+.image-gallery.layout-ready .folder-grid .folder-caption {
+  font-size: 0.95rem;
+  color: #374151 !important;
+  letter-spacing: 0.01em;
+}
+
+body.dark .image-gallery.layout-ready .folder-grid .folder-caption {
+  color: #d1d5db !important;
+}
+
+.image-gallery.layout-ready .artwork-grid {
+  display: none;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+body.artwork-visible .image-gallery.layout-ready .artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  body.artwork-visible .image-gallery.layout-ready .artwork-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  body.artwork-visible .image-gallery.layout-ready .artwork-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  body.artwork-visible .image-gallery.layout-ready .artwork-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.image-gallery.layout-ready .artwork-grid picture {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.image-gallery.layout-ready .artwork-grid img.draggable {
+  position: static !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  border-radius: 18px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+  touch-action: auto !important;
+  user-select: auto !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.image-gallery.layout-ready .artwork-grid img.draggable:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.22);
+}
+
+body.dark .image-gallery.layout-ready .artwork-grid img.draggable {
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+}
+
+body.artwork-visible .gallery-container {
+  min-height: auto;
+}
+
 /* === End overrides === */
 
 /* 2) Asegúrate de que el título no traiga un margin excesivo */
